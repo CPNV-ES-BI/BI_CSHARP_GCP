@@ -2,22 +2,22 @@ namespace MyMicroservice;
 
 public class DataObject : IDataObject
 {
-    public bool DoesExist(string name)
+    public bool DoesExist(string path)
     {
         throw new NotImplementedException();
     }
 
-    public void Create(string name)
+    public void Create(object data)
     {
         throw new NotImplementedException();
     }
 
-    public void Download(string name)
+    public void Download(string path)
     {
         throw new NotImplementedException();
     }
 
-    public void Publish(string name)
+    public void Publish(object data)
     {
         throw new NotImplementedException();
     }
