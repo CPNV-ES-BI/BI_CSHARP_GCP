@@ -7,11 +7,15 @@ public class TestDataObject
 {
     public DataObject dataObject = null!;
     
-    [ClassInitialize]
-    public void Setup(TestContext context)
+    // Before each
+
+    [TestInitialize()]
+    public void Startup()
     {
         dataObject = new();
     }
+
+    #region DoesExist
 
     [TestMethod]
     public void DoesExist_ExistsCase_True()
@@ -38,4 +42,47 @@ public class TestDataObject
         // Assert
         Assert.IsFalse(result);
     }
+
+    #endregion
+
+    #region Create Object
+
+    [TestMethod]
+    public void CreateObject_NominalCase_ObjectExists()
+    {
+        // Arrange
+        var data = new object();
+
+        // Act
+        dataObject.Create(data);
+
+        // Assert
+        Assert.IsTrue(dataObject.DoesExist("path"));
+    }
+
+    [TestMethod]
+    public void CreateObject_AlreadyExists_ThrowException()
+    {
+        // Arrange
+        var data = new object();
+
+        // Act
+        dataObject.Create(data);
+
+        // Assert
+        Assert.ThrowsException<Exception>(() => dataObject.Create(data));
+    }
+
+    [TestMethod]
+    public void CreateObject_PathNotExists_ObjectExists()
+    {
+        // Arrange
+
+        // Act
+
+        // Assert
+    }
+
+    #endregion
+
 }
