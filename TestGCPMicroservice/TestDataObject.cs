@@ -1,5 +1,3 @@
-using MyMicroservice;
-
 namespace TestGCPMicroservice;
 
 [TestClass]
@@ -138,7 +136,7 @@ public class TestDataObject
         Assert.ThrowsException<Exception>(() => dataObject.Publish(path));
 
         // Assert
-        // Throw an exception
+        // Throw an exception   
     }
 
     #endregion
