@@ -113,4 +113,33 @@ public class TestDataObject
 
     #endregion
 
+    #region Publish Object
+
+    [TestMethod]
+    public void PublishObject_NominalCase_ObjectPublished()
+    {
+        // Arrange
+        string path = "valid-path";
+
+        // Act
+        dataObject.Publish(path);
+
+        // Assert
+        Assert.IsTrue(dataObject.DoesExist(path));
+    }
+
+    [TestMethod]
+    public void PublishObject_ObjectNotFound_ThrowException()
+    {
+        // Arrange
+        string path = "invalid-path";
+
+        // Act
+        Assert.ThrowsException<Exception>(() => dataObject.Publish(path));
+
+        // Assert
+        // Throw an exception
+    }
+
+    #endregion
 }
