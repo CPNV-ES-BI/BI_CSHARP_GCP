@@ -7,8 +7,6 @@ public class TestDataObject
 {
     public DataObject dataObject = null!;
     
-    // Before each
-
     [TestInitialize()]
     public void Startup()
     {
@@ -21,10 +19,10 @@ public class TestDataObject
     public void DoesExist_ExistsCase_True()
     {
         // Arrange
-        var path = "valid-path";
+        string path = "valid-path";
 
         // Act
-        var result = dataObject.DoesExist(path);
+        bool result = dataObject.DoesExist(path);
 
         // Assert
         Assert.IsTrue(result);
@@ -34,10 +32,10 @@ public class TestDataObject
     public void DoesExist_NotExists_False()
     {
         // Arrange
-        var path = "invalid-path";
-
+        string path = "invalid-path";
+        
         // Act
-        var result = dataObject.DoesExist(path);
+        bool result = dataObject.DoesExist(path);
 
         // Assert
         Assert.IsFalse(result);
@@ -51,7 +49,7 @@ public class TestDataObject
     public void CreateObject_NominalCase_ObjectExists()
     {
         // Arrange
-        var data = new object();
+        object data = new();
 
         // Act
         dataObject.Create(data);
@@ -64,13 +62,13 @@ public class TestDataObject
     public void CreateObject_AlreadyExists_ThrowException()
     {
         // Arrange
-        var data = new object();
+        object data = new();
 
         // Act
-        dataObject.Create(data);
+        Assert.ThrowsException<Exception>(() => dataObject.Create(data));
 
         // Assert
-        Assert.ThrowsException<Exception>(() => dataObject.Create(data));
+        // Throw an exception
     }
 
     [TestMethod]
@@ -81,6 +79,36 @@ public class TestDataObject
         // Act
 
         // Assert
+    }
+
+    #endregion
+
+    #region Download Object
+
+    [TestMethod]
+    public void DownloadObject_NominalCase_Downloaded()
+    {
+        // Arrange
+        string path = "valid-path";
+
+        // Act
+        object data = dataObject.Download(path);
+
+        // Assert
+        Assert.IsNotNull(data);
+    }
+
+    [TestMethod]
+    public void DownloadObject_NotExists_ThrowException()
+    {
+        // Arrange
+        string path = "invalid-path";
+
+        // Act
+        Assert.ThrowsException<Exception>(() => dataObject.Download(path));
+
+        // Assert
+        // Throw an exception
     }
 
     #endregion
