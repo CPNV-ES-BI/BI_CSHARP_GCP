@@ -3,7 +3,7 @@ namespace TestGCPMicroservice;
 [TestClass]
 public class TestGCPDataObject
 {
-    const string BUCKET = "gs://bi.csharp.gcp.cld.education/";
+    const string BUCKET = "bi.csharp.gcp.cld.education";
  
     public GCPDataObject dataObject = null!;
     
@@ -52,7 +52,7 @@ public class TestGCPDataObject
         object data = new();
 
         // Act
-        dataObject.Create(data);
+        // dataObject.Create(data);
 
         // Assert
         //Assert.IsTrue(dataObject.DoesExist("path"));
@@ -65,7 +65,7 @@ public class TestGCPDataObject
         object data = new();
 
         // Act
-        Assert.ThrowsException<Exception>(() => dataObject.Create(data));
+        // Assert.ThrowsException<Exception>(() => dataObject.Create(data));
 
         // Assert
         // Throw an exception
@@ -75,10 +75,14 @@ public class TestGCPDataObject
     public void CreateObject_PathNotExists_ObjectExists()
     {
         // Arrange
+        object data = new object();
+        string path = "valid-path";
 
         // Act
+        // dataObject.Create(data, path);
 
         // Assert
+        // Assert.IsTrue(dataObject.DoesExist(path));
     }
 
     #endregion
@@ -89,10 +93,10 @@ public class TestGCPDataObject
     public void DownloadObject_NominalCase_Downloaded()
     {
         // Arrange
-        string path = "valid-path";
+        string name = "test.txt";
 
         // Act
-        object data = dataObject.Download(path);
+        object data = dataObject.Download(name);
 
         // Assert
         Assert.IsNotNull(data);
@@ -102,10 +106,10 @@ public class TestGCPDataObject
     public void DownloadObject_NotExists_ThrowException()
     {
         // Arrange
-        string path = "invalid-path";
+        string name = "invalid-name";
 
         // Act
-        Assert.ThrowsException<Exception>(() => dataObject.Download(path));
+        Assert.ThrowsException<Exception>(() => dataObject.Download(name));
 
         // Assert
         // Throw an exception
@@ -119,10 +123,11 @@ public class TestGCPDataObject
     public void PublishObject_NominalCase_ObjectPublished()
     {
         // Arrange
-        string path = "valid-path";
+        string name = "valid-name";
+        object data = new();
 
         // Act
-        dataObject.Publish(path);
+        dataObject.Publish(name, data);
 
         // Assert
         //Assert.IsTrue(dataObject.DoesExist(path));
@@ -132,10 +137,11 @@ public class TestGCPDataObject
     public void PublishObject_ObjectNotFound_ThrowException()
     {
         // Arrange
-        string path = "invalid-path";
+        string name = "valid-name";
+        object data = new();
 
         // Act
-        Assert.ThrowsException<Exception>(() => dataObject.Publish(path));
+        Assert.ThrowsException<Exception>(() => dataObject.Publish(name, data));
 
         // Assert
         // Throw an exception   

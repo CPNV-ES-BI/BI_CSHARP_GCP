@@ -1,33 +1,37 @@
 namespace GCPMicroservice;
-using Google.Apis.Storage.v1.Data;
 using Google.Cloud.Storage.V1;
+using System.IO;
+
 public class GCPDataObject : IDataObject
 {
-    private string bucketName;
-    private StorageClient client = StorageClient.Create();
-    public GCPDataObject(string bucketName)
+    private StorageClient _client = StorageClient.Create();
+    private string _bucket;
+    
+    public GCPDataObject(string bucket)
     {
-        this.bucketName = bucketName;
+        _bucket = bucket;
     }
+    
     public void Create(object data)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<bool> DoesExist(string objectName)
+    public async Task<bool> DoesExist(string name)
     {
-        Object? googleAsset = await client.GetObjectAsync(bucketName, objectName);
-        
-        return googleAsset is not null;
+        return await _client.GetObjectAsync(_bucket, name) is not null;
     }
 
-    public async Task<object> Download(string path)
+    public async Task<object> Download(string name)
     {
-        throw new NotImplementedException();
+        Stream destination = new MemoryStream();
+        var obj = await _client.DownloadObjectAsync(_bucket, name, destination);
+        return obj;
     }
-
-    public void Publish(object data)
+    
+    public void Publish(string name, object data)
     {
-        throw new NotImplementedException();
+        Stream source = new MemoryStream();
+        _client.UploadObject(_bucket, name, null, source);
     }
 }
