@@ -13,8 +13,6 @@ This ASP.NET microservice whose purpose is to implement [Google Cloud Plateform]
   </ol>
 </details>
 
-## Description
-
 ## Run
 
 ### Docker
