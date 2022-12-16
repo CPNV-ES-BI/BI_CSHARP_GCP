@@ -13,6 +13,13 @@ This ASP.NET microservice whose purpose is to implement [Google Cloud Plateform]
   </ol>
 </details>
 
+## Requirements
+
+| Requirement     | Version  | Link                                                                                                                                                               |
+|-----------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| .NET            | 7        | [Link](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-7.0.101-windows-x64-installer)                                                             |
+| Docker          | 20.10.21 | [Link](https://docs.docker.com/engine/install/)                                                                                                                    |
+
 ## Run
 
 ### Docker
