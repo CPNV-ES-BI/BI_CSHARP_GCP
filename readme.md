@@ -1,8 +1,9 @@
+<span name="readme-top"></span>
+
 # BI CSHARP GCP
 
 This ASP.NET microservice whose purpose is to implement [Google Cloud Plateform](https://console.cloud.google.com/getting-started?hl=fr&pli=1) as a data source to perform some techniques related to `Business Intelligence`.
 
-<a name="readme-top"></a>
 <details>
   <summary>Table of Contents</summary>
   <ol>
@@ -24,11 +25,33 @@ This ASP.NET microservice whose purpose is to implement [Google Cloud Plateform]
 
 ### Docker
 
-```shell
+```sh
 docker stop gcpmicroservicecontainer
 docker rmi gcpmicroservice
 docker build -t gcpmicroservice .
 docker run -it --rm -p 3000:80 --name gcpmicroservicecontainer gcpmicroservice
+```
+
+## Tests
+
+[Dotnet Test](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test)
+
+To run all the tests, run the following command
+
+```sh
+dotnet test
+```
+
+To run all tests of a specific class
+
+```sh
+dotnet test --filter ClassName=<ProjectName>.<ClassName>
+```
+
+To run a specific test
+
+```sh
+dotnet test --filter FullyQualifiedName=<ProjectName>.<ClassName>.<MethodName>
 ```
 
 ## Contribute
@@ -41,17 +64,17 @@ Contributions are what make the open source community such an amazing place to l
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right"><a href="#readme-top">back to top</a></p>
 
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right"><a href="#readme-top">back to top</a></p>
 
 ## Contact
 
 - [MARECHAL Armand](https://github.com/Penfu)
 - [COSTA-DOS-SANTOS Mauro-Alexandre](https://github.com/MauroWasTaken)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right"><a href="#readme-top">back to top</a></p>
