@@ -1,4 +1,6 @@
-# GCP microservice C#
+# BI CSHARP GCP
+
+This ASP.NET microservice whose purpose is to implement [Google Cloud Plateform](https://console.cloud.google.com/getting-started?hl=fr&pli=1) as a data source to perform some techniques related to `Business Intelligence`.
 
 <a name="readme-top"></a>
 <details>
