@@ -1,15 +1,18 @@
-namespace GCPMicroservice;
+using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
-using System.IO;
+
+namespace GCPMicroservice;
+
 
 public class GCPDataObject : IDataObject
 {
-    private StorageClient _client = StorageClient.Create();
+    private StorageClient _client;
     private string _bucket;
-    
-    public GCPDataObject(string bucket)
+
+    public GCPDataObject()
     {
-        _bucket = bucket;
+        _client = StorageClient.Create(GoogleCredential.FromAccessToken(Environment.GetEnvironmentVariable("GCP_TOKEN")));
+        _bucket = Environment.GetEnvironmentVariable("GCP_BUCKET");
     }
     
     public void Create(object data)
@@ -25,8 +28,9 @@ public class GCPDataObject : IDataObject
     public async Task<object> Download(string name)
     {
         Stream destination = new MemoryStream();
-        var obj = await _client.DownloadObjectAsync(_bucket, name, destination);
-        return obj;
+        object result = await _client.DownloadObjectAsync(_bucket, name, destination);
+
+        return result;
     }
     
     public void Publish(string name, object data)

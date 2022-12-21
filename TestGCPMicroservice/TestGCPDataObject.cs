@@ -1,22 +1,30 @@
+using Microsoft.Extensions.Configuration;
+
 namespace TestGCPMicroservice;
 
 [TestClass]
 public class TestGCPDataObject
 {
-    const string BUCKET = "bi.csharp.gcp.cld.education";
- 
     public GCPDataObject dataObject = null!;
     
-    [TestInitialize()]
+    [ClassInitialize]
+    public static void ClassInitialize(TestContext context)
+    {
+        string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+        string dotenv = Path.Combine(projectDirectory, ".env");
+        DotEnv.Load(dotenv);
+    }
+    
+    [TestInitialize]
     public void Startup()
     {
-        dataObject = new(BUCKET);
+        dataObject = new ();
     }
 
     #region DoesExist
 
     [TestMethod]
-    public async void DoesExist_ExistsCase_True()
+    public async Task DoesExist_ExistsCase_True()
     {
         // Arrange
         string objectName = "test.txt";
@@ -29,7 +37,7 @@ public class TestGCPDataObject
     }
 
     [TestMethod]
-    public async void DoesExist_NotExists_False()
+    public async Task DoesExist_NotExists_False()
     {
         // Arrange
         string objectName = "invalid-path";
@@ -90,13 +98,13 @@ public class TestGCPDataObject
     #region Download Object
 
     [TestMethod]
-    public void DownloadObject_NominalCase_Downloaded()
+    public async Task DownloadObject_NominalCase_Downloaded()
     {
         // Arrange
         string name = "test.txt";
 
         // Act
-        object data = dataObject.Download(name);
+        object data = await dataObject.Download(name);
 
         // Assert
         Assert.IsNotNull(data);
