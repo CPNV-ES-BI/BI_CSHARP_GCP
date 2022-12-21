@@ -15,6 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag gcpmicroservice:$(date +%s)
+      run: docker build . --file Dockerfile --tag gcpmicroservice
     - name: Run tests in Docker container
-      run: docker run --rm gcpmicroservice:$(date +%s) dotnet test
+      run: docker run --rm gcpmicroservice dotnet test
