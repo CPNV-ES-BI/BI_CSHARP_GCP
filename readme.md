@@ -33,7 +33,10 @@ You can alternatively just compile the code without running it
 ```sh
 dotnet build
 ```
-By doing these commands the nuget packages should be automatically installed
+By doing these commands the nuget packages should be automatically installed, but it is possible to do it manually with the following
+```sh
+dotnet restore
+```
 ### Docker
 
 In order to build the Docker image you have to do the following commands
