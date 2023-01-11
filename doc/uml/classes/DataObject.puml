@@ -1,10 +1,10 @@
 @startuml DataObject
 
 interface IDataObject {
- +bool DoesExist(string path)
+ +bool DoesExist(string name)
  +void Create(object data)
- +object Download(string path)
- +void Publish(object data)
+ +object Download(string name)
+ +void Publish(string name, object data)
 }
 
 @enduml
