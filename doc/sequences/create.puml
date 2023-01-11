@@ -1,0 +1,30 @@
+@startuml DataObject_Create
+
+legend top left
+    Project
+        BI_CSHARP_GCP
+
+    Diagram
+        createObject sequence [DataObject]
+
+    Authors
+        Armand MARECHAL
+        Mauro COSTA-DOS-SANTOS 
+endlegend
+
+actor User
+
+participant "DataObject" as App
+participant "GCP" as GCP
+
+User -> App: CreateObject
+App -> GCP: DoesExist Request
+GCP -> App: DoesExist Response
+
+alt exist
+    App -> User: Throw Exception
+else
+    App -> GCP: PutObject
+end
+
+@enduml
