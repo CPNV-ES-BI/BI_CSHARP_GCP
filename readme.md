@@ -25,11 +25,17 @@ This ASP.NET microservice whose purpose is to implement [Google Cloud Plateform]
 
 ### Docker
 
+In order to build the Docker image you have to do the following commands
+```sh
+docker build -t gcpmicroservice .
+docker run -it --rm -p 3000:80 --name gcpmicroservicecontainer gcpmicroservice
+```
+
+If you already have an existing docker, you'll need stop the container and remove the existing image before generating the new one
+
 ```sh
 docker stop gcpmicroservicecontainer
 docker rmi gcpmicroservice
-docker build -t gcpmicroservice .
-docker run -it --rm -p 3000:80 --name gcpmicroservicecontainer gcpmicroservice
 ```
 
 ## Tests
