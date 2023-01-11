@@ -2,6 +2,10 @@
 
 ## Description
 
+## Project structure
+
+See the [folder structure](doc/folder_structure.md) documentation.
+
 ## Run
 
 ### Run with docker
