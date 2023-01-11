@@ -23,6 +23,17 @@ This ASP.NET microservice whose purpose is to implement [Google Cloud Plateform]
 
 ## Run
 
+### Locally
+
+If you want to Run the program without using a Docker container with the following command
+```sh
+dotnet run
+```
+You can alternatively just compile the code without running it
+```sh
+dotnet build
+```
+By doing these commands the nuget packages should be automatically installed
 ### Docker
 
 In order to build the Docker image you have to do the following commands
