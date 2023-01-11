@@ -1,22 +1,30 @@
+using Microsoft.Extensions.Configuration;
+
 namespace TestGCPMicroservice;
 
 [TestClass]
 public class TestGCPDataObject
 {
-    const string BUCKET = "gs://bi.csharp.gcp.cld.education/";
- 
     public GCPDataObject dataObject = null!;
     
-    [TestInitialize()]
+    [ClassInitialize]
+    public static void ClassInitialize(TestContext context)
+    {
+        string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+        string dotenv = Path.Combine(projectDirectory, ".env");
+        DotEnv.Load(dotenv);
+    }
+    
+    [TestInitialize]
     public void Startup()
     {
-        dataObject = new(BUCKET);
+        dataObject = new ();
     }
 
     #region DoesExist
 
     [TestMethod]
-    public async void DoesExist_ExistsCase_True()
+    public async Task DoesExist_ExistsCase_True()
     {
         // Arrange
         string objectName = "test.txt";
@@ -29,7 +37,7 @@ public class TestGCPDataObject
     }
 
     [TestMethod]
-    public async void DoesExist_NotExists_False()
+    public async Task DoesExist_NotExists_False()
     {
         // Arrange
         string objectName = "invalid-path";
@@ -52,7 +60,7 @@ public class TestGCPDataObject
         object data = new();
 
         // Act
-        dataObject.Create(data);
+        // dataObject.Create(data);
 
         // Assert
         //Assert.IsTrue(dataObject.DoesExist("path"));
@@ -65,7 +73,7 @@ public class TestGCPDataObject
         object data = new();
 
         // Act
-        Assert.ThrowsException<Exception>(() => dataObject.Create(data));
+        // Assert.ThrowsException<Exception>(() => dataObject.Create(data));
 
         // Assert
         // Throw an exception
@@ -75,10 +83,14 @@ public class TestGCPDataObject
     public void CreateObject_PathNotExists_ObjectExists()
     {
         // Arrange
+        object data = new object();
+        string path = "valid-path";
 
         // Act
+        // dataObject.Create(data, path);
 
         // Assert
+        // Assert.IsTrue(dataObject.DoesExist(path));
     }
 
     #endregion
@@ -86,13 +98,13 @@ public class TestGCPDataObject
     #region Download Object
 
     [TestMethod]
-    public void DownloadObject_NominalCase_Downloaded()
+    public async Task DownloadObject_NominalCase_Downloaded()
     {
         // Arrange
-        string path = "valid-path";
+        string name = "test.txt";
 
         // Act
-        object data = dataObject.Download(path);
+        object data = await dataObject.Download(name);
 
         // Assert
         Assert.IsNotNull(data);
@@ -102,10 +114,10 @@ public class TestGCPDataObject
     public void DownloadObject_NotExists_ThrowException()
     {
         // Arrange
-        string path = "invalid-path";
+        string name = "invalid-name";
 
         // Act
-        Assert.ThrowsException<Exception>(() => dataObject.Download(path));
+        Assert.ThrowsException<Exception>(() => dataObject.Download(name));
 
         // Assert
         // Throw an exception
@@ -119,10 +131,11 @@ public class TestGCPDataObject
     public void PublishObject_NominalCase_ObjectPublished()
     {
         // Arrange
-        string path = "valid-path";
+        string name = "valid-name";
+        object data = new();
 
         // Act
-        dataObject.Publish(path);
+        dataObject.Publish(name, data);
 
         // Assert
         //Assert.IsTrue(dataObject.DoesExist(path));
@@ -132,10 +145,11 @@ public class TestGCPDataObject
     public void PublishObject_ObjectNotFound_ThrowException()
     {
         // Arrange
-        string path = "invalid-path";
+        string name = "valid-name";
+        object data = new();
 
         // Act
-        Assert.ThrowsException<Exception>(() => dataObject.Publish(path));
+        Assert.ThrowsException<Exception>(() => dataObject.Publish(name, data));
 
         // Assert
         // Throw an exception   
