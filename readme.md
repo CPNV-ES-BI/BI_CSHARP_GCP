@@ -8,6 +8,7 @@ This ASP.NET microservice whose purpose is to implement [Google Cloud Plateform]
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#docker">Docker</a></li>
+    <li><a href="#tests">Tests</a></li>
     <li><a href="#contribute">Contribute</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
