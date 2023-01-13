@@ -75,6 +75,10 @@ To run a specific test
 dotnet test --filter FullyQualifiedName=<ProjectName>.<ClassName>.<MethodName>
 ```
 
+## Swagger
+
+This microservice uses [Swagger](https://learn.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-7.0&tabs=visual-studio) to document and test the API endpoints. To access the Swagger documentation, navigate to `/swagger/index.html` in your browser after running the microservice. This will display a list of all available endpoints, their parameters, and a "Try it out" button to test the endpoint with your own parameters.
+
 ## Contribute
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
