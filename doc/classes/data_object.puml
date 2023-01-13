@@ -1,10 +1,22 @@
 @startuml DataObject
 
+legend top left
+    Project
+        BI_CSHARP_GCP
+
+    Diagram
+        CreateObject sequence [DataObject]
+
+    Authors
+        Armand MARECHAL
+        Mauro COSTA-DOS-SANTOS 
+endlegend
+
 interface IDataObject {
- +bool DoesExist(string name)
- +void Create(object data)
- +object Download(string name)
- +void Publish(string name, object data)
+ +DoesExist(string key) : boolean
+ +Create(string key, string path) : void
+ +Download(string key) : byte[]
+ +Publish(string key) : string
 }
 
 @enduml
