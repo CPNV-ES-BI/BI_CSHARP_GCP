@@ -100,5 +100,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Contact
 
 - [MARECHAL Armand](https://github.com/Penfu)
+- [COSTA-DOS-SANTOS Mauro-Alexandre](https://github.com/MauroWasTaken)
 
 <p align="right"><a href="#readme-top">back to top</a></p>
