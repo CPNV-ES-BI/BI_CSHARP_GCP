@@ -1,4 +1,4 @@
-@startuml DataObject_Create
+@startuml DownloadObject
 
 legend top left
     Project
@@ -18,14 +18,13 @@ participant "DataObject" as App
 participant "GCP" as GCP
 
 User -> App: DownloadObject
-App -> GCP: DoesExist Request
-GCP -> App: DoesExist Response
+App -> GCP: Download Request
 
 alt exist
-    App -> GCP: GetObject Request
-    GCP -> App: GetObject Response
-    App -> User: Return Object
+    GCP -> App: Download Response
+    App -> User: Object
 else
+    GCP -> App: Throw Exception
     App -> User: Throw Exception
 end
 
