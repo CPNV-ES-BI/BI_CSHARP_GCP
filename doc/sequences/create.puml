@@ -1,4 +1,4 @@
-@startuml DataObject_Create
+@startuml CreateObject
 
 legend top left
     Project
@@ -12,19 +12,14 @@ legend top left
         Mauro COSTA-DOS-SANTOS 
 endlegend
 
-actor User
+actor Client
 
 participant "DataObject" as App
 participant "GCP" as GCP
 
-User -> App: CreateObject
-App -> GCP: DoesExist Request
-GCP -> App: DoesExist Response
-
-alt exist
-    App -> User: Throw Exception
-else
-    App -> GCP: PutObject
-end
+Client -> App: CreateObject
+App -> GCP: Create Request
+GCP -> App: Create Response
+App -> Client: PutObject
 
 @enduml
