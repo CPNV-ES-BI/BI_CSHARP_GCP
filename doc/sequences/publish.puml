@@ -1,4 +1,4 @@
-@startuml DataObject_Create
+@startuml PublishObject
 
 legend top left
     Project
@@ -18,15 +18,13 @@ participant "DataObject" as App
 participant "GCP" as GCP
 
 User -> App: PublishObject
-App -> GCP: DoesExist Request
-GCP -> App: DoesExist Response
+App -> GCP: Publish Request
 
 alt exist
-    App -> GCP: Publish Request
     GCP -> App: Publish Response
     App -> User: Public URL
 else
+    GCP -> App: Throw Exception
     App -> User: Throw Exception
 end
-
 @enduml
