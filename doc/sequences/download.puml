@@ -12,20 +12,20 @@ legend top left
         Mauro COSTA-DOS-SANTOS 
 endlegend
 
-actor User
+actor Client
 
 participant "DataObject" as App
 participant "GCP" as GCP
 
-User -> App: DownloadObject
+Client -> App: DownloadObject
 App -> GCP: Download Request
 
 alt exist
     GCP -> App: Download Response
-    App -> User: Object
+    App -> Client: Object
 else
     GCP -> App: Throw Exception
-    App -> User: Throw Exception
+    App -> Client: Throw Exception
 end
 
 @enduml

@@ -12,19 +12,19 @@ legend top left
         Mauro COSTA-DOS-SANTOS 
 endlegend
 
-actor User
+actor Client
 
 participant "DataObject" as App
 participant "GCP" as GCP
 
-User -> App: DoesExist
+Client -> App: DoesExist
 App -> GCP: GetObject Request
 GCP -> App: GetObject Response
 
 alt exception
-    App -> User: false
+    App -> Client: false
 else
-    App -> User: true
+    App -> Client: true
 end
 
 @enduml
