@@ -2,7 +2,7 @@ namespace GCPMicroservice;
 
 public interface IDataObject
 {
-    public Task<bool> DoesExist(string name);
+    public Task<bool> DoesExist(string key);
 
     public void Create(object data);
 

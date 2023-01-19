@@ -1,5 +1,6 @@
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
+using System.Net;
 
 namespace GCPMicroservice;
 
@@ -20,9 +21,20 @@ public class GCPDataObject : IDataObject
         throw new NotImplementedException();
     }
 
-    public async Task<bool> DoesExist(string name)
+    public async Task<bool> DoesExist(string key)
     {
-        return await _client.GetObjectAsync(_bucket, name) is not null;
+        try
+        {
+            await _client.GetObjectAsync(_bucket, key);
+            return true;
+        }
+        catch (Google.GoogleApiException e)
+        {
+            if (e.HttpStatusCode == HttpStatusCode.NotFound)
+                return false;
+            else
+                throw;
+        }
     }
 
     public async Task<object> Download(string name)
