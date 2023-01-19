@@ -8,8 +8,10 @@ namespace TestGCPMicroservice;
 [TestClass]
 public class TestGCPDataObject
 {
-    private const string PATH = "tests/";
-    private const string KEY = PATH + "object.txt";
+    private const string PATH     = "tests/";
+    private const string KEY      = "object.txt";
+    private const string FULL_KEY = PATH + KEY;
+
     private readonly byte[] CONTENT = Encoding.UTF8.GetBytes("content of the file");
 
     private GCPDataObject _dataObject = null!;
@@ -31,8 +33,7 @@ public class TestGCPDataObject
     [TestCleanup]
     public async Task Cleanup()
     {
-        if (await _dataObject.DoesExist(KEY))
-            await _dataObject.Delete(KEY);
+            await _dataObject.Delete(PATH, true);
     }
 
     #region DoesExist
@@ -41,10 +42,10 @@ public class TestGCPDataObject
     public async Task DoesExist_ExistsCase_True()
     {
         // Arrange
-        await _dataObject.Create(KEY, CONTENT);
+        await _dataObject.Create(FULL_KEY, CONTENT);
 
         // Act
-        bool result = await _dataObject.DoesExist(KEY);
+        bool result = await _dataObject.DoesExist(FULL_KEY);
 
         // Assert
         Assert.IsTrue(result);
@@ -54,7 +55,7 @@ public class TestGCPDataObject
     public async Task DoesExist_NotExists_False()
     {
         // Arrange
-        string key = "invalid-key";
+        string key = PATH + "invalid-key";
 
         // Act
         bool result = await _dataObject.DoesExist(key);
@@ -73,8 +74,8 @@ public class TestGCPDataObject
         // Arrange
         
         // Act
-        await _dataObject.Create(KEY, CONTENT);
-        bool exist = await _dataObject.DoesExist(KEY);
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        bool exist = await _dataObject.DoesExist(FULL_KEY);
 
         // Assert
         Assert.IsTrue(exist);
@@ -84,14 +85,14 @@ public class TestGCPDataObject
     public async Task CreateObject_AlreadyExists_ThrowException()
     {
         // Arrange
-        await _dataObject.Create(KEY, CONTENT);
-        bool exist = await _dataObject.DoesExist(KEY);
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        bool exist = await _dataObject.DoesExist(FULL_KEY);
 
         Assert.IsTrue(exist);
 
         // Act
         await Assert.ThrowsExceptionAsync<DataObjectAlreadyExistsException>(async () => 
-            await _dataObject.Create(KEY, CONTENT));
+            await _dataObject.Create(FULL_KEY, CONTENT));
 
         // Assert
         // Exception is thrown
@@ -101,7 +102,7 @@ public class TestGCPDataObject
     public async Task CreateObject_PathNotExists_ObjectExists()
     {
         // Arrange
-        string key = PATH + "not_existing_path/object.txt";
+        string key = PATH + "not_existing_path/" + KEY;
 
         // Act
         await _dataObject.Create(key, CONTENT);
@@ -186,15 +187,15 @@ public class TestGCPDataObject
         // Arrange
         bool exist;
 
-        await _dataObject.Create(KEY, CONTENT);
-        exist = await _dataObject.DoesExist(KEY);
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        exist = await _dataObject.DoesExist(FULL_KEY);
         Assert.IsTrue(exist);
 
         // Act
-        await _dataObject.Delete(KEY);
+        await _dataObject.Delete(FULL_KEY);
 
         // Assert
-        exist = await _dataObject.DoesExist(KEY);
+        exist = await _dataObject.DoesExist(FULL_KEY);
         Assert.IsFalse(exist);
     }
 
@@ -202,18 +203,42 @@ public class TestGCPDataObject
     public async Task DeleteObject_ObjectContainingSubObjectsExists_ObjectDeletedRecursively()
     {
         // Arrange
+        string parent = "object-parent/";
+        string[] childs = { "object1.txt", "object2.txt" };
+        
+        bool exist;
+
+        foreach (string child in childs)
+        {
+            await _dataObject.Create(PATH + parent + child, CONTENT);
+            exist = await _dataObject.DoesExist(PATH + parent + child);
+        
+            Assert.IsTrue(exist);
+        }
 
         // Act
+        await _dataObject.Delete(PATH + parent, true);
 
         // Assert
+        foreach (string child in childs)
+        {
+            exist = await _dataObject.DoesExist(PATH + parent + child);
+            Assert.IsFalse(exist);
+        }
     }
 
     [TestMethod]
     public async Task DeleteObject_ObjectDoesntExist_ThrowException()
     {
         // Arrange
+        string key = PATH + "invalid-key";
+        bool result = await _dataObject.DoesExist(key);
+
+        Assert.IsFalse(result);
 
         // Act
+        await Assert.ThrowsExceptionAsync<DataObjectAlreadyExistsException>(async () =>
+            await _dataObject.Delete(key));
 
         // Assert
         // Exception is thrown

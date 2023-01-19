@@ -16,7 +16,7 @@ public class GCPDataObject : IDataObject
         _client = StorageClient.Create(GoogleCredential.FromAccessToken(Environment.GetEnvironmentVariable("GCP_TOKEN")));
         _bucket = Environment.GetEnvironmentVariable("GCP_BUCKET");
     }
-   
+
     public async Task<bool> DoesExist(string key)
     {
         try
@@ -36,14 +36,13 @@ public class GCPDataObject : IDataObject
     public async Task Create(string key, byte[] content)
     {
         if (await DoesExist(key))
-            throw new DataObjectAlreadyExistsException(key);
+            throw new DataObjectAlreadyExistsException();
 
         using (var stream = new MemoryStream(content))
         {
             await _client.UploadObjectAsync(_bucket, key, "text/plain", stream);
         }
     }
-
 
     public async Task<object> Download(string name)
     {
@@ -52,7 +51,7 @@ public class GCPDataObject : IDataObject
 
         return result;
     }
-    
+
     public void Publish(string name, object data)
     {
         Stream source = new MemoryStream();
@@ -61,6 +60,38 @@ public class GCPDataObject : IDataObject
 
     public async Task Delete(string key)
     {
-        await _client.DeleteObjectAsync(_bucket, key);
+        await TryToDelete(key);
+    }
+
+    public async Task Delete(string key, bool recursively)
+    {
+        if (recursively)
+        {
+            var objects = _client.ListObjectsAsync(_bucket, key);
+
+            await foreach (var o in objects)
+            {
+                await TryToDelete(o.Name);
+            }
+        }
+        else
+        {
+            await TryToDelete(key);
+        }
+    }
+
+    private async Task TryToDelete(string key)
+    {
+        try
+        {
+            await _client.DeleteObjectAsync(_bucket, key);
+        }
+        catch (Google.GoogleApiException e)
+        {
+            if (e.HttpStatusCode == HttpStatusCode.NotFound)
+                throw new DataObjectAlreadyExistsException();
+            else
+                throw;
+        }
     }
 }
