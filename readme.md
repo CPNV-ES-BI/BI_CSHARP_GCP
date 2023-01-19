@@ -28,6 +28,16 @@ See the [folder structure](doc/folder_structure.md) documentation.
 
 ## Run
 
+### Environment variables
+
+Generate your token from Google Cloud Plateform
+
+```sh
+gcloud auth application-default print-access-token
+```
+
+Create a `.env` file from `.env-example` in both Microservice and Test projects.
+
 ### Locally
 
 
