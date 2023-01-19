@@ -1,3 +1,4 @@
+using GCPMicroservice.Exceptions;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using System.Net;
@@ -15,12 +16,7 @@ public class GCPDataObject : IDataObject
         _client = StorageClient.Create(GoogleCredential.FromAccessToken(Environment.GetEnvironmentVariable("GCP_TOKEN")));
         _bucket = Environment.GetEnvironmentVariable("GCP_BUCKET");
     }
-    
-    public void Create(object data)
-    {
-        throw new NotImplementedException();
-    }
-
+   
     public async Task<bool> DoesExist(string key)
     {
         try
@@ -37,6 +33,18 @@ public class GCPDataObject : IDataObject
         }
     }
 
+    public async Task Create(string key, byte[] content)
+    {
+        if (await DoesExist(key))
+            throw new DataObjectAlreadyExistsException(key);
+
+        using (var stream = new MemoryStream(content))
+        {
+            await _client.UploadObjectAsync(_bucket, key, "text/plain", stream);
+        }
+    }
+
+
     public async Task<object> Download(string name)
     {
         Stream destination = new MemoryStream();
@@ -49,5 +57,10 @@ public class GCPDataObject : IDataObject
     {
         Stream source = new MemoryStream();
         _client.UploadObject(_bucket, name, null, source);
+    }
+
+    public async Task Delete(string key)
+    {
+        await _client.DeleteObjectAsync(_bucket, key);
     }
 }
