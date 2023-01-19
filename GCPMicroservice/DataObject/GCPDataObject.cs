@@ -44,12 +44,23 @@ public class GCPDataObject : IDataObject
         }
     }
 
-    public async Task<object> Download(string name)
+    public async Task<byte[]> Download(string key)
     {
-        Stream destination = new MemoryStream();
-        object result = await _client.DownloadObjectAsync(_bucket, name, destination);
-
-        return result;
+        using (var destination = new MemoryStream())
+        {
+            try
+            {
+                await _client.DownloadObjectAsync(_bucket, key, destination);
+                return destination.ToArray();
+            }
+            catch (Google.GoogleApiException e)
+            {
+                if (e.HttpStatusCode == HttpStatusCode.NotFound)
+                    throw new DataObjectNotFoundException();
+                else
+                    throw;
+            }
+        }
     }
 
     public void Publish(string name, object data)
@@ -89,7 +100,7 @@ public class GCPDataObject : IDataObject
         catch (Google.GoogleApiException e)
         {
             if (e.HttpStatusCode == HttpStatusCode.NotFound)
-                throw new DataObjectAlreadyExistsException();
+                throw new DataObjectNotFoundException();
             else
                 throw;
         }

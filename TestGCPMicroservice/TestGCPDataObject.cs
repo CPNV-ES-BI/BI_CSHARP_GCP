@@ -1,7 +1,6 @@
 using GCPMicroservice.Exceptions;
-using System.Security.Cryptography.Xml;
+using System.Collections;
 using System.Text;
-using System.Xml.Linq;
 
 namespace TestGCPMicroservice;
 
@@ -33,7 +32,7 @@ public class TestGCPDataObject
     [TestCleanup]
     public async Task Cleanup()
     {
-            await _dataObject.Delete(PATH, true);
+        await _dataObject.Delete(PATH, true);
     }
 
     #region DoesExist
@@ -123,23 +122,27 @@ public class TestGCPDataObject
     public async Task DownloadObject_NominalCase_Downloaded()
     {
         // Arrange
-        string name = "test.txt";
+        await _dataObject.Create(FULL_KEY, CONTENT);
 
         // Act
-        object data = await _dataObject.Download(name);
+        byte[] dataObject = await _dataObject.Download(FULL_KEY);
 
         // Assert
-        Assert.IsNotNull(data);
+        Assert.IsTrue(CONTENT.SequenceEqual(dataObject));
     }
 
     [TestMethod]
-    public void DownloadObject_NotExists_ThrowException()
+    public async Task DownloadObject_NotExists_ThrowException()
     {
         // Arrange
-        string name = "invalid-name";
+        string key = PATH + "invalid-key";
+        bool result = await _dataObject.DoesExist(key);
+
+        Assert.IsFalse(result);
 
         // Act
-        Assert.ThrowsException<Exception>(() => _dataObject.Download(name));
+        await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () =>
+            await _dataObject.Download(key));
 
         // Assert
         // Throw an exception
@@ -237,7 +240,7 @@ public class TestGCPDataObject
         Assert.IsFalse(result);
 
         // Act
-        await Assert.ThrowsExceptionAsync<DataObjectAlreadyExistsException>(async () =>
+        await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () =>
             await _dataObject.Delete(key));
 
         // Assert
