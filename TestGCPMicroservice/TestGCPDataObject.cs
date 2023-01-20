@@ -1,7 +1,4 @@
 using GCPMicroservice.Exceptions;
-using System.Collections;
-using System.Net;
-using System.Security.Cryptography.Xml;
 using System.Text;
 
 namespace TestGCPMicroservice;

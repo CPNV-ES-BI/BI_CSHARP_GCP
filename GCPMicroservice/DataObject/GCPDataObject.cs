@@ -6,7 +6,6 @@ using System.Net;
 
 namespace GCPMicroservice;
 
-
 public class GCPDataObject : IDataObject
 {
     private StorageClient _client;
