@@ -28,4 +28,12 @@ public class DataObjectController : ControllerBase
             return BadRequest("Invalid base64 string");
         }
     }
+
+    [HttpDelete]
+    [Route("delete")]
+    public async Task<IActionResult> DeleteDataObject(string key)
+    {
+        await _dataObject.Delete(key);
+        return Ok();
+    }
 }
