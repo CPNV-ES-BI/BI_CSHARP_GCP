@@ -8,7 +8,7 @@ public interface IDataObject
 
     public Task<byte[]> Download(string key);
 
-    public void Publish(string name, object data);
+    public Task<string> Publish(string key);
 
     public Task Delete(string key);
 }

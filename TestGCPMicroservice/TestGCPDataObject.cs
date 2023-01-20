@@ -1,5 +1,7 @@
 using GCPMicroservice.Exceptions;
 using System.Collections;
+using System.Net;
+using System.Security.Cryptography.Xml;
 using System.Text;
 
 namespace TestGCPMicroservice;
@@ -24,14 +26,9 @@ public class TestGCPDataObject
     }
     
     [TestInitialize]
-    public void Startup()
+    public async Task Startup()
     {
         _dataObject = new ();
-    }
-
-    [TestCleanup]
-    public async Task Cleanup()
-    {
         await _dataObject.Delete(PATH, true);
     }
 
@@ -123,12 +120,15 @@ public class TestGCPDataObject
     {
         // Arrange
         await _dataObject.Create(FULL_KEY, CONTENT);
+        bool exist = await _dataObject.DoesExist(FULL_KEY);
+
+        Assert.IsTrue(exist);
 
         // Act
-        byte[] dataObject = await _dataObject.Download(FULL_KEY);
+        byte[] obj = await _dataObject.Download(FULL_KEY);
 
         // Assert
-        Assert.IsTrue(CONTENT.SequenceEqual(dataObject));
+        Assert.IsTrue(CONTENT.SequenceEqual(obj));
     }
 
     [TestMethod]
@@ -136,9 +136,9 @@ public class TestGCPDataObject
     {
         // Arrange
         string key = PATH + "invalid-key";
-        bool result = await _dataObject.DoesExist(key);
+        bool exist = await _dataObject.DoesExist(key);
 
-        Assert.IsFalse(result);
+        Assert.IsFalse(exist);
 
         // Act
         await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () =>
@@ -153,30 +153,38 @@ public class TestGCPDataObject
     #region Publish Object
 
     [TestMethod]
-    public void PublishObject_NominalCase_ObjectPublished()
+    public async Task PublishObject_NominalCase_ObjectPublished()
     {
         // Arrange
-        string name = "valid-name";
-        object data = new();
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        bool exist = await _dataObject.DoesExist(FULL_KEY);
+
+        Assert.IsTrue(exist);
 
         // Act
-        _dataObject.Publish(name, data);
+        string url = await _dataObject.Publish(FULL_KEY);
 
         // Assert
-        //Assert.IsTrue(dataObject.DoesExist(path));
+        using (HttpClient client = new())
+        {
+            var response = await client.GetAsync(url);
+            var obj = await response.Content.ReadAsByteArrayAsync();
+
+            // Then
+            Assert.IsTrue(CONTENT.SequenceEqual(obj));
+        }
     }
 
     [TestMethod]
-    public void PublishObject_ObjectNotFound_ThrowException()
+    public async Task PublishObject_ObjectNotFound_ThrowException()
     {
         // Arrange
-        string name = "valid-name";
-        object data = new();
 
         // Act
-        Assert.ThrowsException<Exception>(() => _dataObject.Publish(name, data));
 
-        // Assert
+        await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () => await _dataObject.Publish(FULL_KEY));
+
+        // Asserts
         // Throw an exception   
     }
 

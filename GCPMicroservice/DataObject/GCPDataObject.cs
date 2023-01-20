@@ -1,5 +1,6 @@
 using GCPMicroservice.Exceptions;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Storage.v1.Data;
 using Google.Cloud.Storage.V1;
 using System.Net;
 
@@ -63,10 +64,24 @@ public class GCPDataObject : IDataObject
         }
     }
 
-    public void Publish(string name, object data)
+    // Generate a signed URL for a GCP object
+    public async Task<string> Publish(string key)
     {
-        Stream source = new MemoryStream();
-        _client.UploadObject(_bucket, name, null, source);
+        try
+        {
+            var obj = await _client.GetObjectAsync(_bucket, key);
+            obj.Acl = new List<ObjectAccessControl> { new ObjectAccessControl { Entity = "allUsers", Role = "READER" } };
+            _client.UpdateObject(obj);
+
+            return obj.MediaLink;
+        }
+        catch (Google.GoogleApiException e)
+        {
+            if (e.HttpStatusCode == HttpStatusCode.NotFound)
+                throw new DataObjectNotFoundException();
+            else
+                throw;
+        }
     }
 
     public async Task Delete(string key)
