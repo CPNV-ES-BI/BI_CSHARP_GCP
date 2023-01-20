@@ -1,41 +1,57 @@
+using GCPMicroservice.Exceptions;
+using System.Text;
+
 namespace TestGCPMicroservice;
 
 [TestClass]
 public class TestGCPDataObject
 {
-    const string BUCKET = "gs://bi.csharp.gcp.cld.education/";
- 
-    public GCPDataObject dataObject = null!;
-    
-    [TestInitialize()]
-    public void Startup()
+    private const string PATH     = "tests/";
+    private const string KEY      = "object.txt";
+    private const string FULL_KEY = PATH + KEY;
+
+    private readonly byte[] CONTENT = Encoding.UTF8.GetBytes("content of the file");
+
+    private GCPDataObject _dataObject = null!;
+
+    [ClassInitialize]
+    public static void ClassInitialize(TestContext context)
     {
-        dataObject = new(BUCKET);
+        string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+        string dotenv = Path.Combine(projectDirectory, ".env");
+        DotEnv.Load(dotenv);
+    }
+    
+    [TestInitialize]
+    public async Task Startup()
+    {
+        _dataObject = new ();
+        await _dataObject.Delete(PATH, true);
     }
 
     #region DoesExist
 
     [TestMethod]
-    public async void DoesExist_ExistsCase_True()
+    public async Task DoesExist_ExistsCase_True()
     {
         // Arrange
-        string objectName = "test.txt";
+        await _dataObject.Create(FULL_KEY, CONTENT);
 
         // Act
-        bool result = await dataObject.DoesExist(objectName);
+        bool result = await _dataObject.DoesExist(FULL_KEY);
 
         // Assert
         Assert.IsTrue(result);
     }
 
     [TestMethod]
-    public async void DoesExist_NotExists_False()
+    public async Task DoesExist_NotExists_False()
     {
         // Arrange
-        string objectName = "invalid-path";
+        string key = PATH + "invalid-key";
 
         // Act
-        bool result = await dataObject.DoesExist(objectName);
+        bool result = await _dataObject.DoesExist(key);
 
         // Assert
         Assert.IsFalse(result);
@@ -46,39 +62,50 @@ public class TestGCPDataObject
     #region Create Object
 
     [TestMethod]
-    public void CreateObject_NominalCase_ObjectExists()
+    public async Task CreateObject_NominalCase_ObjectExists()
     {
         // Arrange
-        object data = new();
-
+        
         // Act
-        dataObject.Create(data);
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        bool exist = await _dataObject.DoesExist(FULL_KEY);
 
         // Assert
-        //Assert.IsTrue(dataObject.DoesExist("path"));
+        Assert.IsTrue(exist);
     }
 
     [TestMethod]
-    public void CreateObject_AlreadyExists_ThrowException()
+    public async Task CreateObject_AlreadyExists_ThrowException()
     {
         // Arrange
-        object data = new();
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        bool exist = await _dataObject.DoesExist(FULL_KEY);
+
+        Assert.IsTrue(exist);
 
         // Act
-        Assert.ThrowsException<Exception>(() => dataObject.Create(data));
+        await Assert.ThrowsExceptionAsync<DataObjectAlreadyExistsException>(async () => 
+            await _dataObject.Create(FULL_KEY, CONTENT));
 
         // Assert
-        // Throw an exception
+        // Exception is thrown
     }
 
     [TestMethod]
-    public void CreateObject_PathNotExists_ObjectExists()
+    public async Task CreateObject_PathNotExists_ObjectExists()
     {
         // Arrange
+        string key = PATH + "not_existing_path/" + KEY;
 
         // Act
+        await _dataObject.Create(key, CONTENT);
+        bool exist = await _dataObject.DoesExist(key);
 
         // Assert
+        Assert.IsTrue(exist);
+
+        // Cleanup
+        await _dataObject.Delete(key);
     }
 
     #endregion
@@ -86,26 +113,33 @@ public class TestGCPDataObject
     #region Download Object
 
     [TestMethod]
-    public void DownloadObject_NominalCase_Downloaded()
+    public async Task DownloadObject_NominalCase_Downloaded()
     {
         // Arrange
-        string path = "valid-path";
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        bool exist = await _dataObject.DoesExist(FULL_KEY);
+
+        Assert.IsTrue(exist);
 
         // Act
-        object data = dataObject.Download(path);
+        byte[] obj = await _dataObject.Download(FULL_KEY);
 
         // Assert
-        Assert.IsNotNull(data);
+        Assert.IsTrue(CONTENT.SequenceEqual(obj));
     }
 
     [TestMethod]
-    public void DownloadObject_NotExists_ThrowException()
+    public async Task DownloadObject_NotExists_ThrowException()
     {
         // Arrange
-        string path = "invalid-path";
+        string key = PATH + "invalid-key";
+        bool exist = await _dataObject.DoesExist(key);
+
+        Assert.IsFalse(exist);
 
         // Act
-        Assert.ThrowsException<Exception>(() => dataObject.Download(path));
+        await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () =>
+            await _dataObject.Download(key));
 
         // Assert
         // Throw an exception
@@ -116,29 +150,106 @@ public class TestGCPDataObject
     #region Publish Object
 
     [TestMethod]
-    public void PublishObject_NominalCase_ObjectPublished()
+    public async Task PublishObject_NominalCase_ObjectPublished()
     {
         // Arrange
-        string path = "valid-path";
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        bool exist = await _dataObject.DoesExist(FULL_KEY);
+
+        Assert.IsTrue(exist);
 
         // Act
-        dataObject.Publish(path);
+        string url = await _dataObject.Publish(FULL_KEY);
 
         // Assert
-        //Assert.IsTrue(dataObject.DoesExist(path));
+        using (HttpClient client = new())
+        {
+            var response = await client.GetAsync(url);
+            var obj = await response.Content.ReadAsByteArrayAsync();
+
+            // Then
+            Assert.IsTrue(CONTENT.SequenceEqual(obj));
+        }
     }
 
     [TestMethod]
-    public void PublishObject_ObjectNotFound_ThrowException()
+    public async Task PublishObject_ObjectNotFound_ThrowException()
     {
         // Arrange
-        string path = "invalid-path";
 
         // Act
-        Assert.ThrowsException<Exception>(() => dataObject.Publish(path));
+
+        await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () => await _dataObject.Publish(FULL_KEY));
+
+        // Asserts
+        // Throw an exception   
+    }
+
+    #endregion
+
+    #region Delete Object
+
+    [TestMethod]
+    public async Task DeleteObject_ObjectExists_ObjectDeleted()
+    {
+        // Arrange
+        bool exist;
+
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        exist = await _dataObject.DoesExist(FULL_KEY);
+        Assert.IsTrue(exist);
+
+        // Act
+        await _dataObject.Delete(FULL_KEY);
 
         // Assert
-        // Throw an exception   
+        exist = await _dataObject.DoesExist(FULL_KEY);
+        Assert.IsFalse(exist);
+    }
+
+    [TestMethod]
+    public async Task DeleteObject_ObjectContainingSubObjectsExists_ObjectDeletedRecursively()
+    {
+        // Arrange
+        string parent = "object-parent/";
+        string[] childs = { "object1.txt", "object2.txt" };
+        
+        bool exist;
+
+        foreach (string child in childs)
+        {
+            await _dataObject.Create(PATH + parent + child, CONTENT);
+            exist = await _dataObject.DoesExist(PATH + parent + child);
+        
+            Assert.IsTrue(exist);
+        }
+
+        // Act
+        await _dataObject.Delete(PATH + parent, true);
+
+        // Assert
+        foreach (string child in childs)
+        {
+            exist = await _dataObject.DoesExist(PATH + parent + child);
+            Assert.IsFalse(exist);
+        }
+    }
+
+    [TestMethod]
+    public async Task DeleteObject_ObjectDoesntExist_ThrowException()
+    {
+        // Arrange
+        string key = PATH + "invalid-key";
+        bool result = await _dataObject.DoesExist(key);
+
+        Assert.IsFalse(result);
+
+        // Act
+        await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () =>
+            await _dataObject.Delete(key));
+
+        // Assert
+        // Exception is thrown
     }
 
     #endregion

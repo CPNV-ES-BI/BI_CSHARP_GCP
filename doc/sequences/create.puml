@@ -1,0 +1,25 @@
+@startuml CreateObject
+
+legend top left
+    Project
+        BI_CSHARP_GCP
+
+    Diagram
+        CreateObject sequence [DataObject]
+
+    Authors
+        Armand MARECHAL
+        Mauro COSTA-DOS-SANTOS 
+endlegend
+
+actor Client
+
+participant "DataObject" as App
+participant "GCP" as GCP
+
+Client -> App: CreateObject
+App -> GCP: Create Request
+GCP -> App: Create Response
+App -> Client: PutObject
+
+@enduml

@@ -1,0 +1,122 @@
+using GCPMicroservice.Exceptions;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Storage.v1.Data;
+using Google.Cloud.Storage.V1;
+using System.Net;
+
+namespace GCPMicroservice;
+
+public class GCPDataObject : IDataObject
+{
+    private StorageClient _client;
+    private string _bucket;
+
+    public GCPDataObject()
+    {
+        _client = StorageClient.Create(GoogleCredential.FromAccessToken(Environment.GetEnvironmentVariable("GCP_TOKEN")));
+        _bucket = Environment.GetEnvironmentVariable("GCP_BUCKET");
+    }
+
+    public async Task<bool> DoesExist(string key)
+    {
+        try
+        {
+            await _client.GetObjectAsync(_bucket, key);
+            return true;
+        }
+        catch (Google.GoogleApiException e)
+        {
+            if (e.HttpStatusCode == HttpStatusCode.NotFound)
+                return false;
+            else
+                throw;
+        }
+    }
+
+    public async Task Create(string key, byte[] content)
+    {
+        if (await DoesExist(key))
+            throw new DataObjectAlreadyExistsException();
+
+        using (var stream = new MemoryStream(content))
+        {
+            await _client.UploadObjectAsync(_bucket, key, "text/plain", stream);
+        }
+    }
+
+    public async Task<byte[]> Download(string key)
+    {
+        using (var destination = new MemoryStream())
+        {
+            try
+            {
+                await _client.DownloadObjectAsync(_bucket, key, destination);
+                return destination.ToArray();
+            }
+            catch (Google.GoogleApiException e)
+            {
+                if (e.HttpStatusCode == HttpStatusCode.NotFound)
+                    throw new DataObjectNotFoundException();
+                else
+                    throw;
+            }
+        }
+    }
+
+    // Generate a signed URL for a GCP object
+    public async Task<string> Publish(string key)
+    {
+        try
+        {
+            var obj = await _client.GetObjectAsync(_bucket, key);
+            obj.Acl = new List<ObjectAccessControl> { new ObjectAccessControl { Entity = "allUsers", Role = "READER" } };
+            _client.UpdateObject(obj);
+
+            return obj.MediaLink;
+        }
+        catch (Google.GoogleApiException e)
+        {
+            if (e.HttpStatusCode == HttpStatusCode.NotFound)
+                throw new DataObjectNotFoundException();
+            else
+                throw;
+        }
+    }
+
+    public async Task Delete(string key)
+    {
+        await TryToDelete(key);
+    }
+
+    public async Task Delete(string key, bool recursively)
+    {
+        if (recursively)
+        {
+            var objects = _client.ListObjectsAsync(_bucket, key);
+
+            await foreach (var o in objects)
+            {
+                await TryToDelete(o.Name);
+            }
+        }
+        else
+        {
+            await TryToDelete(key);
+        }
+    }
+
+    private async Task TryToDelete(string key)
+    {
+        try
+        {
+            await _client.DeleteObjectAsync(_bucket, key);
+        }
+        catch (Google.GoogleApiException e)
+        {
+            if (e.HttpStatusCode == HttpStatusCode.NotFound)
+                throw new DataObjectNotFoundException();
+            else
+                throw;
+        }
+    }
+}

@@ -1,0 +1,30 @@
+@startuml PublishObject
+
+legend top left
+    Project
+        BI_CSHARP_GCP
+
+    Diagram
+        PublishObject sequence [DataObject]
+
+    Authors
+        Armand MARECHAL
+        Mauro COSTA-DOS-SANTOS 
+endlegend
+
+actor Client
+
+participant "DataObject" as App
+participant "GCP" as GCP
+
+Client -> App: PublishObject
+App -> GCP: Publish Request
+
+alt exist
+    GCP -> App: Publish Response
+    App -> Client: Public URL
+else
+    GCP -> App: Throw Exception
+    App -> Client: Throw Exception
+end
+@enduml

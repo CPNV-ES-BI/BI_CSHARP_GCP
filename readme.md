@@ -22,25 +22,47 @@ This ASP.NET microservice whose purpose is to implement [Google Cloud Plateform]
 | .NET            | 7        | [Link](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-7.0.101-windows-x64-installer)                                                             |
 | Docker          | 20.10.21 | [Link](https://docs.docker.com/engine/install/)                                                                                                                    |
 
+## Project structure
+
+See the [folder structure](doc/folder_structure.md) documentation.
+
 ## Run
+
+### Environment variables
+
+Generate your token from Google Cloud Plateform
+
+```sh
+gcloud auth application-default print-access-token
+```
+
+Create a `.env` file from `.env-example` in both Microservice and Test projects.
 
 ### Locally
 
+
 If you want to Run the program without using a Docker container with the following command
+
 ```sh
 dotnet run
 ```
+
 You can alternatively just compile the code without running it
+
 ```sh
 dotnet build
 ```
+
 By doing these commands the nuget packages should be automatically installed, but it is possible to do it manually with the following
+
 ```sh
 dotnet restore
 ```
+
 ### Docker
 
 In order to build the Docker image you have to do the following commands
+
 ```sh
 docker build -t gcpmicroservice .
 docker run -it --rm -p 3000:80 --name gcpmicroservicecontainer gcpmicroservice
