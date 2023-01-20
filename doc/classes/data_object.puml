@@ -12,11 +12,39 @@ legend top left
         Mauro COSTA-DOS-SANTOS 
 endlegend
 
-interface IDataObject {
- +DoesExist(string key) : boolean
- +Create(string key, string path) : void
- +Download(string key) : byte[]
- +Publish(string key) : string
+package GCP_Microservice {
+    interface IDataObject {
+     +doesExist(string key) : boolean
+     +create(string key, string path) : void
+     +download(string key) : byte[]
+     +publish(string key) : string
+    }
+
+    class GCPDataObject {
+     -client : StorageClient
+     -bucket : String
+    }
+
+    class DataObjectAlreadyExistsException {
+     +dataObjectAlreadyExistsException(message : string)
+    }
+
+    class DataObjectNotFoundException {
+     +dataObjectNotFoundException(message : string)
+    }
 }
+
+package GCP_SDK {}
+
+IDataObject <|.. GCPDataObject
+GCP_Microservice ..> GCP_SDK: Imports
+
+class Exception
+
+GCPDataObject ..> DataObjectAlreadyExistsException : throws
+GCPDataObject ..> DataObjectNotFoundException : throws
+
+DataObjectAlreadyExistsException --|> Exception
+DataObjectNotFoundException --|> Exception
 
 @enduml
