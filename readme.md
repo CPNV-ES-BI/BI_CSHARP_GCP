@@ -61,10 +61,9 @@ dotnet restore
 
 ### Docker
 
-In order to build the Docker image you have to do the following commands
-
+In order to build the Docker image you have to do the following commands, keep in mind that if there are any failing tests the build will fail
 ```sh
-docker build -t gcpmicroservice .
+docker build --target publish -t gcpmicroservice .
 docker run -it --rm -p 3000:80 --name gcpmicroservicecontainer gcpmicroservice
 ```
 
@@ -74,6 +73,13 @@ If you already have an existing docker, you'll need stop the container and remov
 docker stop gcpmicroservicecontainer
 docker rmi gcpmicroservice
 ```
+#### Docker Targets
+
+In this project we have 3 different docker targets
+
+- `publish` : This target is used to build the test andpublish the project. This build will fail if there are any failing tests
+- `dev` : This target is the same as publish but it skips testing
+- `testrunner` : Allows you to run all the tests inside of a docker container
 
 ## Tests
 
@@ -95,6 +101,12 @@ To run a specific test
 
 ```sh
 dotnet test --filter FullyQualifiedName=<ProjectName>.<ClassName>.<MethodName>
+```
+
+To run all tests inside of a docker container
+
+```sh
+docker build --target testrunner -t gcpmicroservice .
 ```
 
 ## Swagger

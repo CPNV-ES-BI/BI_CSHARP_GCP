@@ -1,5 +1,8 @@
 name: Docker Image CI
 env:
+  MIX_ENV: CD
+  GCP_BUCKET: ${{ secrets.GCP_BUCKET }}
+  GCP_TOKEN: ${{ secrets.GCP_TOKEN }}
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 on:
   push:
@@ -14,25 +17,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
-    - uses: actions/checkout@v3
-    
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag gcpmicroservice
-    
-    - name: Run tests in Docker container
-      run: docker run --rm gcpmicroservice dotnet test
-      
-    - name: Install .NET Core SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '7.x.x'
-      
-    - name: Restore NuGet packages
-      run: dotnet restore
+    - uses: actions/checkout@v1.3
 
-    - name: Build
-      run: dotnet build -c Release --no-restore
-    
-    - name: Test
-      run: dotnet test -c Release --no-build
+    - name: Make envfile
+      uses: SpicyPizza/create-envfile@v1.3
+      with:
+        envkey_GCP_BUCKET: ${{ secrets.GCP_BUCKET }}
+        envkey_GCP_TOKEN: ${{ secrets.GCP_TOKEN }}
+        directory: GCPMicroservice
+        file_name: .env
+        fail_on_empty: true
+
+    - name: Make envfile for test
+      uses: SpicyPizza/create-envfile@v1.3
+      with:
+        envkey_GCP_BUCKET: ${{ secrets.GCP_BUCKET }}
+        envkey_GCP_TOKEN: ${{ secrets.GCP_TOKEN }}
+        directory: TestGCPMicroservice
+        file_name: .env
+        fail_on_empty: true
+
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag gcpmicroservice --target publish
