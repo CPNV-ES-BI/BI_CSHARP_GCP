@@ -1,5 +1,4 @@
 using GCPMicroservice.Exceptions;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using System.Text;
 
 namespace TestGCPMicroservice;
@@ -7,11 +6,11 @@ namespace TestGCPMicroservice;
 [TestClass]
 public class TestGCPDataObject
 {
-    private const string PATH     = "tests/";
-    private const string KEY      = "object.txt";
-    private const string FULL_KEY = PATH + KEY;
+    private const string Path     = "tests/";
+    private const string Key      = "object.txt";
+    private const string FullKey = Path + Key;
 
-    private readonly byte[] CONTENT = Encoding.UTF8.GetBytes("content of the file");
+    private readonly byte[] Content = Encoding.UTF8.GetBytes("content of the file");
 
     private GCPDataObject _dataObject = null!;
 
@@ -19,7 +18,7 @@ public class TestGCPDataObject
     public static void ClassInitialize(TestContext context)
     {
         string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
-        string dotenv = Path.Combine(projectDirectory, ".env");
+        string dotenv = System.IO.Path.Combine(projectDirectory, ".env");
         DotEnv.Load(dotenv);
     }
     
@@ -27,7 +26,7 @@ public class TestGCPDataObject
     public async Task Startup()
     {
         _dataObject = new ();
-        await _dataObject.Delete(PATH, true);
+        await _dataObject.Delete(Path, true);
     }
 
     #region DoesExist
@@ -36,26 +35,26 @@ public class TestGCPDataObject
     public async Task DoesExist_ExistsCase_True()
     {
         // Arrange
-        await _dataObject.Create(FULL_KEY, CONTENT);
+        await _dataObject.Create(FullKey, Content);
 
         // Act
-        bool result = await _dataObject.DoesExist(FULL_KEY);
+        bool responseExist = await _dataObject.DoesExist(FullKey);
 
         // Assert
-        Assert.IsTrue(result);
+        Assert.IsTrue(responseExist);
     }
 
     [TestMethod]
     public async Task DoesExist_NotExists_False()
     {
         // Arrange
-        string key = PATH + "invalid-key";
+        string key = Path + "invalid-key";
 
         // Act
-        bool result = await _dataObject.DoesExist(key);
+        bool responseExist = await _dataObject.DoesExist(key);
 
         // Assert
-        Assert.IsFalse(result);
+        Assert.IsFalse(responseExist);
     }
 
     #endregion
@@ -68,28 +67,28 @@ public class TestGCPDataObject
         // Arrange
         
         // Act
-        await _dataObject.Create(FULL_KEY, CONTENT);
+        await _dataObject.Create(FullKey, Content);
 
-        bool responseExist = await _dataObject.DoesExist(FULL_KEY);
-        byte[] responseContent = await _dataObject.Download(FULL_KEY);
+        bool responseExist = await _dataObject.DoesExist(FullKey);
+        byte[] responseContent = await _dataObject.Download(FullKey);
 
         // Assert
         Assert.IsTrue(responseExist);
-        Assert.IsTrue(CONTENT.SequenceEqual(responseContent));
+        Assert.IsTrue(Content.SequenceEqual(responseContent));
     }
 
     [TestMethod]
     public async Task CreateObject_AlreadyExists_ThrowException()
     {
         // Arrange
-        await _dataObject.Create(FULL_KEY, CONTENT);
-        bool exist = await _dataObject.DoesExist(FULL_KEY);
+        await _dataObject.Create(FullKey, Content);
+        bool exist = await _dataObject.DoesExist(FullKey);
 
         Assert.IsTrue(exist);
 
         // Act
         await Assert.ThrowsExceptionAsync<DataObjectAlreadyExistsException>(async () => 
-            await _dataObject.Create(FULL_KEY, CONTENT));
+            await _dataObject.Create(FullKey, Content));
 
         // Assert
         // Exception is thrown
@@ -101,15 +100,15 @@ public class TestGCPDataObject
         // Arrange
         byte[] content = Encoding.UTF8.GetBytes("updated content");
 
-        await _dataObject.Create(FULL_KEY, CONTENT);
-        bool exist = await _dataObject.DoesExist(FULL_KEY);
+        await _dataObject.Create(FullKey, Content);
+        bool exist = await _dataObject.DoesExist(FullKey);
 
         Assert.IsTrue(exist);
 
         // Act
-        await _dataObject.Create(FULL_KEY, content, true);
-        bool responseExist = await _dataObject.DoesExist(FULL_KEY);
-        byte[] responseContent = await _dataObject.Download(FULL_KEY); 
+        await _dataObject.Create(FullKey, content, true);
+        bool responseExist = await _dataObject.DoesExist(FullKey);
+        byte[] responseContent = await _dataObject.Download(FullKey); 
 
         // Assert
         Assert.IsTrue(responseExist);
@@ -120,17 +119,17 @@ public class TestGCPDataObject
     public async Task CreateObject_PathNotExists_ObjectExists()
     {
         // Arrange
-        string key = PATH + "not_existing_path/" + KEY;
+        string key = Path + "not_existing_path/" + Key;
 
         // Act
-        await _dataObject.Create(key, CONTENT);
+        await _dataObject.Create(key, Content);
 
         bool responseExist = await _dataObject.DoesExist(key);
         byte[] responseContent = await _dataObject.Download(key);
 
         // Assert
         Assert.IsTrue(responseExist);
-        Assert.IsTrue(CONTENT.SequenceEqual(responseContent));
+        Assert.IsTrue(Content.SequenceEqual(responseContent));
     }
 
     #endregion
@@ -141,23 +140,23 @@ public class TestGCPDataObject
     public async Task DownloadObject_NominalCase_Downloaded()
     {
         // Arrange
-        await _dataObject.Create(FULL_KEY, CONTENT);
-        bool exist = await _dataObject.DoesExist(FULL_KEY);
+        await _dataObject.Create(FullKey, Content);
+        bool exist = await _dataObject.DoesExist(FullKey);
 
         Assert.IsTrue(exist);
 
         // Act
-        byte[] obj = await _dataObject.Download(FULL_KEY);
+        byte[] responseContent = await _dataObject.Download(FullKey);
 
         // Assert
-        Assert.IsTrue(CONTENT.SequenceEqual(obj));
+        Assert.IsTrue(Content.SequenceEqual(responseContent));
     }
 
     [TestMethod]
     public async Task DownloadObject_NotExists_ThrowException()
     {
         // Arrange
-        string key = PATH + "invalid-key";
+        string key = Path + "invalid-key";
         bool exist = await _dataObject.DoesExist(key);
 
         Assert.IsFalse(exist);
@@ -178,23 +177,21 @@ public class TestGCPDataObject
     public async Task PublishObject_NominalCase_ObjectPublished()
     {
         // Arrange
-        await _dataObject.Create(FULL_KEY, CONTENT);
-        bool exist = await _dataObject.DoesExist(FULL_KEY);
+        await _dataObject.Create(FullKey, Content);
+        bool exist = await _dataObject.DoesExist(FullKey);
 
         Assert.IsTrue(exist);
 
         // Act
-        string url = await _dataObject.Publish(FULL_KEY);
+        string url = await _dataObject.Publish(FullKey);
 
         // Assert
-        using (HttpClient client = new())
-        {
-            var response = await client.GetAsync(url);
-            var obj = await response.Content.ReadAsByteArrayAsync();
+        using HttpClient client = new();
+        var responseUrl = await client.GetAsync(url);
+        var responseContent = await responseUrl.Content.ReadAsByteArrayAsync();
 
-            // Then
-            Assert.IsTrue(CONTENT.SequenceEqual(obj));
-        }
+        // Then
+        Assert.IsTrue(Content.SequenceEqual(responseContent));
     }
 
     [TestMethod]
@@ -204,7 +201,7 @@ public class TestGCPDataObject
 
         // Act
 
-        await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () => await _dataObject.Publish(FULL_KEY));
+        await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () => await _dataObject.Publish(FullKey));
 
         // Asserts
         // Throw an exception   
@@ -218,18 +215,17 @@ public class TestGCPDataObject
     public async Task DeleteObject_ObjectExists_ObjectDeleted()
     {
         // Arrange
-        bool exist;
+        await _dataObject.Create(FullKey, Content);
+        bool exist = await _dataObject.DoesExist(FullKey);
 
-        await _dataObject.Create(FULL_KEY, CONTENT);
-        exist = await _dataObject.DoesExist(FULL_KEY);
         Assert.IsTrue(exist);
 
         // Act
-        await _dataObject.Delete(FULL_KEY);
+        await _dataObject.Delete(FullKey);
+        bool responseExist = await _dataObject.DoesExist(FullKey);
 
         // Assert
-        exist = await _dataObject.DoesExist(FULL_KEY);
-        Assert.IsFalse(exist);
+        Assert.IsFalse(responseExist);
     }
 
     [TestMethod]
@@ -239,24 +235,22 @@ public class TestGCPDataObject
         string parent = "object-parent/";
         string[] childs = { "object1.txt", "object2.txt" };
         
-        bool exist;
-
         foreach (string child in childs)
         {
-            await _dataObject.Create(PATH + parent + child, CONTENT);
-            exist = await _dataObject.DoesExist(PATH + parent + child);
+            await _dataObject.Create(Path + parent + child, Content);
+            bool exist = await _dataObject.DoesExist(Path + parent + child);
         
             Assert.IsTrue(exist);
         }
 
         // Act
-        await _dataObject.Delete(PATH + parent, true);
+        await _dataObject.Delete(Path + parent, true);
 
         // Assert
         foreach (string child in childs)
         {
-            exist = await _dataObject.DoesExist(PATH + parent + child);
-            Assert.IsFalse(exist);
+            bool responseExist = await _dataObject.DoesExist(Path + parent + child);
+            Assert.IsFalse(responseExist);
         }
     }
 
@@ -264,10 +258,10 @@ public class TestGCPDataObject
     public async Task DeleteObject_ObjectDoesntExist_ThrowException()
     {
         // Arrange
-        string key = PATH + "invalid-key";
-        bool result = await _dataObject.DoesExist(key);
+        string key = Path + "invalid-key";
+        bool exist = await _dataObject.DoesExist(key);
 
-        Assert.IsFalse(result);
+        Assert.IsFalse(exist);
 
         // Act
         await Assert.ThrowsExceptionAsync<DataObjectNotFoundException>(async () =>
