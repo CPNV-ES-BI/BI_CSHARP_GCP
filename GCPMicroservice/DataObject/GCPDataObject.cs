@@ -33,10 +33,10 @@ public class GCPDataObject : IDataObject
         }
     }
 
-    public async Task Create(string key, byte[] content)
+    public async Task Create(string key, byte[] content, bool force = false)
     {
-        if (await DoesExist(key))
-            throw new DataObjectAlreadyExistsException();
+        if (!force && await DoesExist(key))
+            throw new DataObjectAlreadyExistsException(key);
 
         using (var stream = new MemoryStream(content))
         {

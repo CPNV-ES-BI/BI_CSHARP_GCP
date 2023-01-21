@@ -1,4 +1,5 @@
 using GCPMicroservice.Exceptions;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using System.Text;
 
 namespace TestGCPMicroservice;
@@ -68,10 +69,13 @@ public class TestGCPDataObject
         
         // Act
         await _dataObject.Create(FULL_KEY, CONTENT);
-        bool exist = await _dataObject.DoesExist(FULL_KEY);
+
+        bool responseExist = await _dataObject.DoesExist(FULL_KEY);
+        byte[] responseContent = await _dataObject.Download(FULL_KEY);
 
         // Assert
-        Assert.IsTrue(exist);
+        Assert.IsTrue(responseExist);
+        Assert.IsTrue(CONTENT.SequenceEqual(responseContent));
     }
 
     [TestMethod]
@@ -92,6 +96,27 @@ public class TestGCPDataObject
     }
 
     [TestMethod]
+    public async Task ForceCreateObject_AlreadyExists_ObjectExists()
+    {
+        // Arrange
+        byte[] content = Encoding.UTF8.GetBytes("updated content");
+
+        await _dataObject.Create(FULL_KEY, CONTENT);
+        bool exist = await _dataObject.DoesExist(FULL_KEY);
+
+        Assert.IsTrue(exist);
+
+        // Act
+        await _dataObject.Create(FULL_KEY, content, true);
+        bool responseExist = await _dataObject.DoesExist(FULL_KEY);
+        byte[] responseContent = await _dataObject.Download(FULL_KEY); 
+
+        // Assert
+        Assert.IsTrue(responseExist);
+        Assert.IsTrue(content.SequenceEqual(responseContent));
+    }
+
+    [TestMethod]
     public async Task CreateObject_PathNotExists_ObjectExists()
     {
         // Arrange
@@ -99,13 +124,13 @@ public class TestGCPDataObject
 
         // Act
         await _dataObject.Create(key, CONTENT);
-        bool exist = await _dataObject.DoesExist(key);
+
+        bool responseExist = await _dataObject.DoesExist(key);
+        byte[] responseContent = await _dataObject.Download(key);
 
         // Assert
-        Assert.IsTrue(exist);
-
-        // Cleanup
-        await _dataObject.Delete(key);
+        Assert.IsTrue(responseExist);
+        Assert.IsTrue(CONTENT.SequenceEqual(responseContent));
     }
 
     #endregion

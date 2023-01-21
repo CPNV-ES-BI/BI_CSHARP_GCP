@@ -15,7 +15,7 @@ endlegend
 package GCP_Microservice {
     interface IDataObject {
      +doesExist(string key) : boolean
-     +create(string key, string path) : void
+     +create(string key, string path, bool? force) : void
      +download(string key) : byte[]
      +publish(string key) : string
     }
