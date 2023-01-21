@@ -2,7 +2,7 @@
 
 namespace GCPMicroservice.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/data-objects")]
 [ApiController]
 public class DataObjectController : ControllerBase
 {
@@ -14,8 +14,7 @@ public class DataObjectController : ControllerBase
     }
 
     [HttpPost]
-    [Route("create")]
-    public async Task<IActionResult> CreateDataObject(string key, string base64Content)
+    public async Task<IActionResult> Create([FromForm]string key, [FromForm]string base64Content)
     {
         try {
             byte[] content = Convert.FromBase64String(base64Content);
@@ -30,24 +29,24 @@ public class DataObjectController : ControllerBase
     }
 
     [HttpGet]
-    [Route("download")]
-    public async Task<IActionResult> DownloadDataObject(string key)
+    [Route("{key}")]
+    public async Task<IActionResult> Download(string key)
     {
         byte[] content = await _dataObject.Download(key);
         return Ok(Convert.ToBase64String(content));
     }
 
     [HttpPatch]
-    [Route("publish")]
-    public async Task<IActionResult> PublishDataObject(string key)
+    [Route("{key}/publish")]
+    public async Task<IActionResult> Publish(string key)
     {
         string url = await _dataObject.Publish(key);
         return Ok(url);
     }
 
     [HttpDelete]
-    [Route("delete")]
-    public async Task<IActionResult> DeleteDataObject(string key)
+    [Route("{key}")]
+    public async Task<IActionResult> Delete(string key)
     {
         await _dataObject.Delete(key);
         return Ok();
