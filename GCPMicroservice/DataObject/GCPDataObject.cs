@@ -83,12 +83,7 @@ public class GCPDataObject : IDataObject
         }
     }
 
-    public async Task Delete(string key)
-    {
-        await TryToDelete(key);
-    }
-
-    public async Task Delete(string key, bool recursively)
+    public async Task Delete(string key, bool recursively = false)
     {
         if (recursively)
         {
