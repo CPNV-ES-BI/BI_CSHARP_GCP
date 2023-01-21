@@ -29,6 +29,14 @@ public class DataObjectController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("download")]
+    public async Task<IActionResult> DownloadDataObject(string key)
+    {
+        byte[] content = await _dataObject.Download(key);
+        return Ok(Convert.ToBase64String(content));
+    }
+
     [HttpPatch]
     [Route("publish")]
     public async Task<IActionResult> PublishDataObject(string key)
