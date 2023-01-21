@@ -29,6 +29,14 @@ public class DataObjectController : ControllerBase
         }
     }
 
+    [HttpPatch]
+    [Route("publish")]
+    public async Task<IActionResult> PublishDataObject(string key)
+    {
+        string url = await _dataObject.Publish(key);
+        return Ok(url);
+    }
+
     [HttpDelete]
     [Route("delete")]
     public async Task<IActionResult> DeleteDataObject(string key)
