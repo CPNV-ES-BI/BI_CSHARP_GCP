@@ -15,12 +15,17 @@ jobs:
 
     - name: Export secrets as environment variables
       run: |
-        echo "GCP_BUCKET=${{ secrets.GCP_BUCKET }}" >> $GITHUB_ENV
-        echo "GCP_TOKEN=${{ secrets.GCP_TOKEN }}" >> $GITHUB_ENV
+        touch .env
+        echo "GCP_BUCKET=${{ secrets.GCP_BUCKET }}" >> .env
+        echo "GCP_TOKEN=${{ secrets.GCP_TOKEN }}" >> .env
+
+    - name: Export secrets as environment variables
+      run: echo "${{ secrets.GCP_BUCKET }}"
 
     - name: Create .env file
       run: | 
-        mv $GITHUB_ENV .env
+        touch TestGCPMicroservice/.env
+        touch GCPMicroservice/.env
         cp .env TestGCPMicroservice/.env
         cp .env GCPMicroservice/.env
 
