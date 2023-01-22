@@ -22,12 +22,21 @@ jobs:
     - name: Export secrets as environment variables
       run: echo "${{ secrets.GCP_BUCKET }}"
 
+    - name: Print .env file
+      run: cat .env
+
     - name: Create .env file
       run: | 
         touch TestGCPMicroservice/.env
         touch GCPMicroservice/.env
         cp .env TestGCPMicroservice/.env
         cp .env GCPMicroservice/.env
+      
+    - name: Print TestGCPMicroservice .env file
+      run: cat TestGCPMicroservice/.env
+
+    - name: Print GCPMicroservice .env file
+      run: cat GCPMicroservice/.env
 
     - name: Build the Docker image
       run: docker build --target publish -t gcpmicroservice .
