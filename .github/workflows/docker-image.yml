@@ -21,8 +21,8 @@ jobs:
     - name: Create .env file
       run: | 
         mv $GITHUB_ENV .env
-        cp .env ./TestGCPMicroservice/.env
-        cp .env ./GCPMicroservice/.env
+        cp .env TestGCPMicroservice/.env
+        cp .env GCPMicroservice/.env
 
     - name: Build the Docker image
       run: docker build --target publish -t gcpmicroservice .
