@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MimeTypes;
 
 namespace GCPMicroservice.Api.Controllers;
 
@@ -14,33 +15,56 @@ public class DataObjectController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromForm]string key, [FromForm]string base64Content)
+    public async Task<IActionResult> Create([FromForm]string key, [FromForm] IFormFile file)
     {
-        try {
-            byte[] content = Convert.FromBase64String(base64Content);
-
-            await _dataObject.Create(key, content);
-            return Ok();
-        }
-        catch (FormatException e)
+        if (file == null || file.Length == 0)
         {
-            return BadRequest("Invalid base64 string");
+            return BadRequest("File not found");
         }
+        using (var memoryStream = new MemoryStream())
+        {
+            await file.CopyToAsync(memoryStream);
+            string fileExt = MimeTypeMap.GetExtension(file.ContentType);
+            string fullKey = $"{key}{fileExt}";
+
+            byte[] content = memoryStream.ToArray();
+            await _dataObject.Create(fullKey, content);
+        }
+        return Ok();
     }
 
     [HttpGet]
     [Route("{key}")]
     public async Task<IActionResult> Download(string key)
     {
-        byte[] content = await _dataObject.Download(key);
-        return Ok(Convert.ToBase64String(content));
+        string contentType = HttpContext.Request.Headers["Content-Type"];
+        if (contentType is null)
+        {
+            return BadRequest("Missing Content-Type header");
+        }
+        
+        string fileExt = MimeTypeMap.GetExtension(contentType);
+        string fullKey = $"{key}{fileExt}";
+        
+        byte[] content = await _dataObject.Download(fullKey);
+        
+        return File(content, contentType, key);
     }
 
     [HttpPatch]
     [Route("{key}/publish")]
     public async Task<IActionResult> Publish(string key)
     {
-        string url = await _dataObject.Publish(key);
+        string contentType = HttpContext.Request.Headers["Content-Type"];
+        if (contentType is null)
+        {
+            return BadRequest("Missing Content-Type header");
+        }
+
+        string fileExt = MimeTypeMap.GetExtension(contentType);
+        string fullKey = $"{key}{fileExt}";
+
+        string url = await _dataObject.Publish(fullKey);
         return Ok(url);
     }
 
@@ -48,7 +72,16 @@ public class DataObjectController : ControllerBase
     [Route("{key}")]
     public async Task<IActionResult> Delete(string key)
     {
-        await _dataObject.Delete(key);
+        string contentType = HttpContext.Request.Headers["Content-Type"];
+        if (contentType is null)
+        {
+            return BadRequest("Missing Content-Type header");
+        }
+
+        string fileExt = MimeTypeMap.GetExtension(contentType);
+        string fullKey = $"{key}{fileExt}";
+        
+        await _dataObject.Delete(fullKey);
         return Ok();
     }
 }
