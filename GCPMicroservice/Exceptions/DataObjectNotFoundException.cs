@@ -1,20 +1,22 @@
-﻿namespace GCPMicroservice.Exceptions;
+﻿using System.Net;
 
-public class DataObjectNotFoundException : Exception
+namespace GCPMicroservice.Exceptions;
+
+public class DataObjectNotFoundException : ApiException
 {
-    public DataObjectNotFoundException()
-    {
+    private const HttpStatusCode HttpCode = HttpStatusCode.NotFound;
+    private const string HttpMessage = "Data object not found";
 
+    public DataObjectNotFoundException() : base(HttpCode, HttpMessage)
+    {
     }
 
-    public DataObjectNotFoundException(string message)
-        : base(message)
+    public DataObjectNotFoundException(string message) : base(HttpCode, HttpMessage, message)
     {
-
     }
 
-    public DataObjectNotFoundException(string message, Exception inner)
-        : base(message, inner)
+    public DataObjectNotFoundException(string message, Exception? inner)
+        : base(HttpCode, HttpMessage, message, inner)
     {
 
     }

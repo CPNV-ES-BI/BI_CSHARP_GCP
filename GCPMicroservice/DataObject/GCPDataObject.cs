@@ -15,6 +15,11 @@ public class GCPDataObject : IDataObject
     {
         _client = StorageClient.Create(GoogleCredential.FromAccessToken(Environment.GetEnvironmentVariable("GCP_TOKEN")));
         _bucket = Environment.GetEnvironmentVariable("GCP_BUCKET");
+
+        if (_client is null)
+            throw new ArgumentException("GCP_TOKEN environment variable is not set");
+        if (_bucket is null)
+            throw new ArgumentException("GCP_BUCKET environment variable is not set");
     }
 
     public async Task<bool> DoesExist(string key)
@@ -36,7 +41,7 @@ public class GCPDataObject : IDataObject
     public async Task Create(string key, byte[] content)
     {
         if (await DoesExist(key))
-            throw new DataObjectAlreadyExistsException();
+            throw new DataObjectAlreadyExistsException(key);
 
         using (var stream = new MemoryStream(content))
         {
@@ -56,14 +61,13 @@ public class GCPDataObject : IDataObject
             catch (Google.GoogleApiException e)
             {
                 if (e.HttpStatusCode == HttpStatusCode.NotFound)
-                    throw new DataObjectNotFoundException();
+                    throw new DataObjectNotFoundException(e.Message, e.InnerException);
                 else
                     throw;
             }
         }
     }
 
-    // Generate a signed URL for a GCP object
     public async Task<string> Publish(string key)
     {
         try
@@ -77,7 +81,7 @@ public class GCPDataObject : IDataObject
         catch (Google.GoogleApiException e)
         {
             if (e.HttpStatusCode == HttpStatusCode.NotFound)
-                throw new DataObjectNotFoundException();
+                throw new DataObjectNotFoundException(e.Message, e.InnerException);
             else
                 throw;
         }
@@ -114,7 +118,7 @@ public class GCPDataObject : IDataObject
         catch (Google.GoogleApiException e)
         {
             if (e.HttpStatusCode == HttpStatusCode.NotFound)
-                throw new DataObjectNotFoundException();
+                throw new DataObjectNotFoundException(e.Message, e.InnerException);
             else
                 throw;
         }

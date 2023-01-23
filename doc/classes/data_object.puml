@@ -25,12 +25,22 @@ package GCP_Microservice {
      -bucket : String
     }
 
+    class ApiException {
+     +apiException(apiCode : HttpStatusCode, apiMessage : string, message : string?, inner : Exception?)
+     +apiCode : HttpStatusCode
+     +apiMessage : String
+    }
+
     class DataObjectAlreadyExistsException {
-     +dataObjectAlreadyExistsException(message : string)
+     +dataObjectAlreadyExistsException(message : string?, inner : Exception?)
+     -apiCode : HttpStatusCode
+     -apiMessage : String
     }
 
     class DataObjectNotFoundException {
-     +dataObjectNotFoundException(message : string)
+     +dataObjectNotFoundException(message : string?, inner : Exception?)
+     -apiCode : HttpStatusCode
+     -apiMessage : String
     }
 }
 
@@ -44,7 +54,9 @@ class Exception
 GCPDataObject ..> DataObjectAlreadyExistsException : throws
 GCPDataObject ..> DataObjectNotFoundException : throws
 
-DataObjectAlreadyExistsException --|> Exception
-DataObjectNotFoundException --|> Exception
+DataObjectAlreadyExistsException --|> ApiException
+DataObjectNotFoundException --|> ApiException
+
+ApiException --|> Exception
 
 @enduml

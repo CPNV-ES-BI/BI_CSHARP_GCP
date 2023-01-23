@@ -1,4 +1,5 @@
 using GCPMicroservice;
+using GCPMicroservice.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
-string dotenv = Path.Combine(projectDirectory, ".env");
+string dotenv = Path.Combine(Environment.CurrentDirectory, ".env");
 DotEnv.Load(dotenv);
 
 builder.Configuration.AddEnvironmentVariables();
@@ -21,11 +21,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); });
 }
 
 app.UseAuthorization();
-
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();
 
 app.Run();
