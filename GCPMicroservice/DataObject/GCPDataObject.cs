@@ -38,9 +38,9 @@ public class GCPDataObject : IDataObject
         }
     }
 
-    public async Task Create(string key, byte[] content)
+    public async Task Create(string key, byte[] content, bool force = false)
     {
-        if (await DoesExist(key))
+        if (!force && await DoesExist(key))
             throw new DataObjectAlreadyExistsException(key);
 
         using (var stream = new MemoryStream(content))
@@ -87,12 +87,7 @@ public class GCPDataObject : IDataObject
         }
     }
 
-    public async Task Delete(string key)
-    {
-        await TryToDelete(key);
-    }
-
-    public async Task Delete(string key, bool recursively)
+    public async Task Delete(string key, bool recursively = false)
     {
         if (recursively)
         {

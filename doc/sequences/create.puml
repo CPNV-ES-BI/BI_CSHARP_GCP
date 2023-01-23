@@ -20,6 +20,6 @@ participant "GCP" as GCP
 Client -> App: CreateObject
 App -> GCP: Create Request
 GCP -> App: Create Response
-App -> Client: PutObject
+App -> Client: void
 
 @enduml
