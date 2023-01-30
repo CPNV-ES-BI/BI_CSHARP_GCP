@@ -5,7 +5,7 @@ legend top left
         BI_CSHARP_GCP
 
     Diagram
-        CreateObject sequence [DataObject]
+        DataObject class [DataObject]
 
     Authors
         Armand MARECHAL
@@ -48,7 +48,7 @@ package GCP_Microservice {
 package GCP_SDK {}
 
 IDataObject <|.. GCPDataObject
-GCP_Microservice ..> GCP_SDK: Imports
+GCPDataObject ..> GCP_SDK: Imports
 
 class Exception
 
