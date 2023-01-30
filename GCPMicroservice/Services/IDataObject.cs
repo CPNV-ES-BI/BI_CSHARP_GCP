@@ -1,4 +1,4 @@
-namespace GCPMicroservice;
+namespace GCPMicroservice.Services;
 
 public interface IDataObject
 {
