@@ -1,5 +1,6 @@
-using GCPMicroservice.Exceptions;
 using System.Text;
+using GCPMicroservice.Services;
+using GCPMicroservice.Exceptions;
 
 namespace TestGCPMicroservice;
 
@@ -95,7 +96,7 @@ public class TestGCPDataObject
     }
 
     [TestMethod]
-    public async Task ForceCreateObject_AlreadyExists_ObjectExists()
+    public async Task CreateObject_ForceAlreadyExists_ObjectExists()
     {
         // Arrange
         byte[] content = Encoding.UTF8.GetBytes("updated content");

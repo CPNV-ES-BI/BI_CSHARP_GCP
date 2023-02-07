@@ -4,7 +4,7 @@ using Google.Apis.Storage.v1.Data;
 using Google.Cloud.Storage.V1;
 using System.Net;
 
-namespace GCPMicroservice;
+namespace GCPMicroservice.Services;
 
 public class GCPDataObject : IDataObject
 {
