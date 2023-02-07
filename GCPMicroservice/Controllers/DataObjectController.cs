@@ -1,4 +1,4 @@
-﻿﻿using MimeTypes;
+﻿using MimeTypes;
 using Microsoft.AspNetCore.Mvc;
 using GCPMicroservice.Services;
 
@@ -16,7 +16,7 @@ public class DataObjectController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromForm]string key, [FromForm] IFormFile file)
+    public async Task<IActionResult> Create([FromForm]string key, [FromForm] IFormFile file, [FromQuery] bool force = false)
     {
         if (file == null || file.Length == 0)
         {
@@ -29,7 +29,7 @@ public class DataObjectController : ControllerBase
             string fullKey = $"{key}{fileExt}";
 
             byte[] content = memoryStream.ToArray();
-            await _dataObject.Create(fullKey, content);
+            await _dataObject.Create(fullKey, content, force);
         }
         return Ok();
     }
@@ -71,7 +71,7 @@ public class DataObjectController : ControllerBase
 
     [HttpDelete]
     [Route("{key}")]
-    public async Task<IActionResult> Delete(string key)
+    public async Task<IActionResult> Delete(string key, [FromQuery] bool recursively = false)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
         if (contentType is null)
@@ -79,10 +79,15 @@ public class DataObjectController : ControllerBase
             return BadRequest("Missing Content-Type header");
         }
 
-        string fileExt = MimeTypeMap.GetExtension(contentType);
-        string fullKey = $"{key}{fileExt}";
+        string fullKey = key;
+
+        if (!recursively)
+        {
+            string fileExt = MimeTypeMap.GetExtension(contentType);
+            fullKey += fileExt;
+        }
         
-        await _dataObject.Delete(fullKey);
+        await _dataObject.Delete(fullKey, recursively);
         return Ok();
     }
 }
