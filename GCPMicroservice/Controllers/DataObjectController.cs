@@ -1,6 +1,7 @@
 ﻿using MimeTypes;
 using Microsoft.AspNetCore.Mvc;
 using GCPMicroservice.Services;
+using System.IO;
 
 namespace GCPMicroservice.Api.Controllers;
 
@@ -36,7 +37,7 @@ public class DataObjectController : ControllerBase
 
     [HttpGet]
     [Route("{key}")]
-    public async Task<IActionResult> Download(string key)
+    public async Task<IActionResult> Download(string key, [FromQuery] string? path = null)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
         if (contentType is null)
@@ -46,15 +47,16 @@ public class DataObjectController : ControllerBase
         
         string fileExt = MimeTypeMap.GetExtension(contentType);
         string fullKey = $"{key}{fileExt}";
+        string fullPath = path is null ? fullKey : $"{path}/{fullKey}";
         
-        byte[] content = await _dataObject.Download(fullKey);
+        byte[] content = await _dataObject.Download(fullPath);
         
         return File(content, contentType, key);
     }
 
     [HttpPatch]
     [Route("{key}/publish")]
-    public async Task<IActionResult> Publish(string key)
+    public async Task<IActionResult> Publish(string key, [FromQuery] string? path = null)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
         if (contentType is null)
@@ -64,30 +66,27 @@ public class DataObjectController : ControllerBase
 
         string fileExt = MimeTypeMap.GetExtension(contentType);
         string fullKey = $"{key}{fileExt}";
+        string fullPath = path is null ? fullKey : $"{path}/{fullKey}";
 
-        string url = await _dataObject.Publish(fullKey);
+        string url = await _dataObject.Publish(fullPath);
         return Ok(url);
     }
 
     [HttpDelete]
     [Route("{key}")]
-    public async Task<IActionResult> Delete(string key, [FromQuery] bool recursively = false)
+    public async Task<IActionResult> Delete(string key, [FromQuery] string? path = null, [FromQuery] bool recursively = false)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
-        if (contentType is null)
+
+        if (!recursively && contentType is null)
         {
             return BadRequest("Missing Content-Type header");
         }
 
-        string fullKey = key;
+        string fullKey = recursively ? key : $"{key}{MimeTypeMap.GetExtension(contentType)}";
+        string fullPath = path is null ? fullKey : $"{path}/{fullKey}";
 
-        if (!recursively)
-        {
-            string fileExt = MimeTypeMap.GetExtension(contentType);
-            fullKey += fileExt;
-        }
-        
-        await _dataObject.Delete(fullKey, recursively);
+        await _dataObject.Delete(fullPath, recursively);
         return Ok();
     }
 }
