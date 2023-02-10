@@ -1,0 +1,30 @@
+@startuml DeleteObject
+
+legend top left
+    Project
+        BI_CSHARP_GCP
+
+    Diagram
+        DeleteObject sequence [DataObject]
+
+    Authors
+        Armand MARECHAL
+        Mauro COSTA-DOS-SANTOS 
+endlegend
+
+actor Client
+
+participant "DataObject" as App
+participant "GCP" as GCP
+
+Client -> App: DeleteObject
+App -> GCP: Delete Request
+
+alt exist
+    GCP -> App: Delete Response
+    App -> Client: void
+else
+    GCP -> App: Throw Exception
+    App -> Client: Throw Exception
+end
+@enduml

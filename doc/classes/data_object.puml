@@ -1,0 +1,63 @@
+@startuml DataObject
+
+legend top left
+    Project
+        BI_CSHARP_GCP
+
+    Diagram
+        DataObject class [DataObject]
+
+    Authors
+        Armand MARECHAL
+        Mauro COSTA-DOS-SANTOS 
+endlegend
+
+package GCP_Microservice {
+    interface IDataObject {
+     +doesExist(string key) : Task<bool>
+     +create(string key, string path, bool force = false) : Task
+     +download(string key) : Task<byte[]>
+     +publish(string key) : Task<string>
+     +delete(string key, bool recursively = false) : Task
+    }
+
+    class GCPDataObject {
+     -client : StorageClient
+     -bucket : String
+    }
+
+    class ApiException {
+     +apiException(apiCode : HttpStatusCode, apiMessage : string, message : string?, inner : Exception?)
+     +apiCode : HttpStatusCode
+     +apiMessage : String
+    }
+
+    class DataObjectAlreadyExistsException {
+     +dataObjectAlreadyExistsException(message : string?, inner : Exception?)
+     -apiCode : HttpStatusCode
+     -apiMessage : String
+    }
+
+    class DataObjectNotFoundException {
+     +dataObjectNotFoundException(message : string?, inner : Exception?)
+     -apiCode : HttpStatusCode
+     -apiMessage : String
+    }
+}
+
+package GCP_SDK {}
+
+IDataObject <|.. GCPDataObject
+GCPDataObject ..> GCP_SDK: Imports
+
+class Exception
+
+GCPDataObject ..> DataObjectAlreadyExistsException : throws
+GCPDataObject ..> DataObjectNotFoundException : throws
+
+DataObjectAlreadyExistsException --|> ApiException
+DataObjectNotFoundException --|> ApiException
+
+ApiException --|> Exception
+
+@enduml

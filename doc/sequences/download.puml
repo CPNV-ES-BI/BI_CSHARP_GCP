@@ -1,0 +1,31 @@
+@startuml DownloadObject
+
+legend top left
+    Project
+        BI_CSHARP_GCP
+
+    Diagram
+        DownloadObject sequence [DataObject]
+
+    Authors
+        Armand MARECHAL
+        Mauro COSTA-DOS-SANTOS 
+endlegend
+
+actor Client
+
+participant "DataObject" as App
+participant "GCP" as GCP
+
+Client -> App: DownloadObject
+App -> GCP: Download Request
+
+alt exist
+    GCP -> App: Download Response
+    App -> Client: Object
+else
+    GCP -> App: Throw Exception
+    App -> Client: Throw Exception
+end
+
+@enduml

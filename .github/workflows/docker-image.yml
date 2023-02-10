@@ -1,0 +1,62 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: install dotnet 7
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 7.0.100
+    
+    - name: extract key file
+      run: | 
+        touch utils/Get-GCP-Token/keyFile.txt
+        echo ${{ secrets.GCP_KEYFILE }} | base64 --decode > utils/Get-GCP-Token/keyFile.json  
+    
+    - name: Getting token
+      run: | 
+        touch utils/Get-GCP-Token/Token.txt
+        cd utils/Get-GCP-Token
+        dotnet run --sakeyfile keyFile.json
+        cd ../..
+        cat utils/Get-GCP-Token/Token.txt
+        cp utils/Get-GCP-Token/Token.txt .env
+    
+    - name: cleanup
+      run: |
+        rm -r utils
+
+    - name: Export secrets as environment variables
+      run: |
+        echo "" >> .env
+        echo "GCP_BUCKET=${{ secrets.GCP_BUCKET }}" >> .env
+
+    - name: Create .env file
+      run: | 
+        touch TestGCPMicroservice/.env
+        touch GCPMicroservice/.env
+        cp .env TestGCPMicroservice/.env
+        cp .env GCPMicroservice/.env
+
+    - name: Build the Docker image
+      run: docker build --target publish -t maurowastaken/gcpmicroservice .
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Push the Docker image
+      run: docker push maurowastaken/gcpmicroservice
+
