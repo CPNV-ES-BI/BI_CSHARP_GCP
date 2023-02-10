@@ -113,6 +113,21 @@ docker build --target testrunner -t gcpmicroservice .
 
 This microservice uses [Swagger](https://learn.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-7.0&tabs=visual-studio) to document and test the API endpoints. To access the Swagger documentation, navigate to `/swagger/index.html` in your browser after running the microservice. This will display a list of all available endpoints, their parameters, and a "Try it out" button to test the endpoint with your own parameters.
 
+## CI CD
+
+This project has a fully automated pipeline using Github Actions.
+if you fork this project, these are the following secrets you'll need to add to your repository
+- GCP_KEYFILE : This is the keyfile.json you can get from Google Cloud Plateform converted to a base64 string
+- GCP_BUCKET: This is the name of the bucket you want to use
+- DOCKER_USERNAME: This is your docker username
+- DOCKER_PASSWORD: This is your docker password
+
+without these secrets the pipeline will fail
+
+### Release
+
+To find the latest release, go to the [release page](https://hub.docker.com/repository/docker/maurowastaken/gcpmicroservice/general)
+
 ## Contribute
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.

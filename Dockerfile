@@ -4,6 +4,8 @@ WORKDIR /src
 COPY GCPMicroservice.sln .
 COPY GCPMicroservice/GCPMicroservice.csproj ./GCPMicroservice/GCPMicroservice.csproj
 COPY TestGCPMicroservice/TestGCPMicroservice.csproj ./TestGCPMicroservice/TestGCPMicroservice.csproj
+# restore the nuget packages
+RUN dotnet restore
 # copy full solution over
 COPY . .
 # build the solution
@@ -29,6 +31,8 @@ RUN dotnet test --logger:trx
 FROM test AS publish
 # set the working directory to be the web api project
 WORKDIR /src/GCPMicroservice
+#remove test project
+RUN rm -r ../TestGCPMicroservice
 # publish the web api project to a directory called out
 RUN dotnet publish -c Release -o out
 
