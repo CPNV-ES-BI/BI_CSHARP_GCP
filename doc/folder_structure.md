@@ -18,7 +18,7 @@ Here is an explanation of the purpose of folders and files in the directory stru
       - `appsettings.Development.json` and `appsettings.json` : These files contains the configurations for the application
       - `Program.cs`: This file contains the main entry point for the application.
       - `Properties`: This folder contains the launchSettings.json, which contains the configuration for how the application runs in the development environment
-      - `DataObject`: This folder contains interfaces and classes that define the data structure and representation of the application.
+      - `Services`: This folder contains interfaces and classes that define the data structure and representation of the application.
 
   - `TestGCPMicroservice`: This directory contains test code for the application.
     - `GCPMicroservice.csproj`: This file is the test project file that contains information about the test project, including its dependencies and build settings.
