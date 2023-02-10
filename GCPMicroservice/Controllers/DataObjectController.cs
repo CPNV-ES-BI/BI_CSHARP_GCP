@@ -5,8 +5,8 @@ using System.IO;
 
 namespace GCPMicroservice.Api.Controllers;
 
-[Route("api/data-objects")]
 [ApiController]
+[Route("api/data-objects")]
 public class DataObjectController : ControllerBase
 {
     private GCPDataObject _dataObject;
@@ -17,7 +17,8 @@ public class DataObjectController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromForm]string key, [FromForm] IFormFile file, [FromQuery] bool force = false)
+    [ProducesResponseType(200), ProducesResponseType(400), ProducesResponseType(409)]
+    public async Task<IActionResult> Create([FromForm]string key, IFormFile file, [FromQuery] bool force = false)
     {
         if (file == null || file.Length == 0)
         {
@@ -37,6 +38,7 @@ public class DataObjectController : ControllerBase
 
     [HttpGet]
     [Route("{key}")]
+    [ProducesResponseType(200), ProducesResponseType(400), ProducesResponseType(404)]
     public async Task<IActionResult> Download(string key, [FromQuery] string? path = null)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
@@ -56,6 +58,7 @@ public class DataObjectController : ControllerBase
 
     [HttpPatch]
     [Route("{key}/publish")]
+    [ProducesResponseType(200), ProducesResponseType(400), ProducesResponseType(404)]
     public async Task<IActionResult> Publish(string key, [FromQuery] string? path = null)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
@@ -74,6 +77,7 @@ public class DataObjectController : ControllerBase
 
     [HttpDelete]
     [Route("{key}")]
+    [ProducesResponseType(200), ProducesResponseType(400), ProducesResponseType(404)]
     public async Task<IActionResult> Delete(string key, [FromQuery] string? path = null, [FromQuery] bool recursively = false)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
