@@ -177,6 +177,8 @@ public class TestGCPDataObject
     [TestMethod]
     public async Task PublishObject_NominalCase_ObjectPublished()
     {
+        Assert.Fail("Not implemented");
+        
         // Arrange
         await _dataObject.Create(FullKey, Content);
         bool exist = await _dataObject.DoesExist(FullKey);
