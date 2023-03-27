@@ -5,7 +5,7 @@ legend top left
         BI_CSHARP_GCP
 
     Diagram
-        CreateObject sequence [DataObject]
+        DataObject class [DataObject]
 
     Authors
         Armand MARECHAL
@@ -14,11 +14,11 @@ endlegend
 
 package GCP_Microservice {
     interface IDataObject {
-     +doesExist(string key) : Task<bool>
-     +create(string key, string path, bool force = false) : Task
-     +download(string key) : Task<byte[]>
-     +publish(string key) : Task<string>
-     +delete(string key, bool recursively = false) : Task
+     +doesExist(string key) : bool
+     +create(string key, string path, bool force = false) : void
+     +download(string key) : byte[]
+     +publish(string key) : string
+     +delete(string key, bool recursively = false) : void
     }
 
     class GCPDataObject {
@@ -48,7 +48,7 @@ package GCP_Microservice {
 package GCP_SDK {}
 
 IDataObject <|.. GCPDataObject
-GCP_Microservice ..> GCP_SDK: Imports
+GCPDataObject ..> GCP_SDK: Imports
 
 class Exception
 

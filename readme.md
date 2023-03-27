@@ -142,7 +142,7 @@ Contributions are what make the open source community such an amazing place to l
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [LICENSE](https://github.com/CPNV-ES-BI/BI_CSHARP_GCP/blob/develop/LICENSE) for more information.
 
 <p align="right"><a href="#readme-top">back to top</a></p>
 

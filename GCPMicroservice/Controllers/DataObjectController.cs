@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MimeTypes;
+﻿using MimeTypes;
+using Microsoft.AspNetCore.Mvc;
+using GCPMicroservice.Services;
+using System.IO;
 
 namespace GCPMicroservice.Api.Controllers;
 
-[Route("api/data-objects")]
 [ApiController]
+[Route("api/data-objects")]
 public class DataObjectController : ControllerBase
 {
     private GCPDataObject _dataObject;
@@ -15,7 +17,8 @@ public class DataObjectController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromForm]string key, [FromForm] IFormFile file)
+    [ProducesResponseType(200), ProducesResponseType(400), ProducesResponseType(409)]
+    public async Task<IActionResult> Create([FromForm]string key, IFormFile file, [FromQuery] bool force = false)
     {
         if (file == null || file.Length == 0)
         {
@@ -28,14 +31,15 @@ public class DataObjectController : ControllerBase
             string fullKey = $"{key}{fileExt}";
 
             byte[] content = memoryStream.ToArray();
-            await _dataObject.Create(fullKey, content);
+            await _dataObject.Create(fullKey, content, force);
         }
         return Ok();
     }
 
     [HttpGet]
     [Route("{key}")]
-    public async Task<IActionResult> Download(string key)
+    [ProducesResponseType(200), ProducesResponseType(400), ProducesResponseType(404)]
+    public async Task<IActionResult> Download(string key, [FromQuery] string? path = null)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
         if (contentType is null)
@@ -45,15 +49,17 @@ public class DataObjectController : ControllerBase
         
         string fileExt = MimeTypeMap.GetExtension(contentType);
         string fullKey = $"{key}{fileExt}";
+        string fullPath = path is null ? fullKey : $"{path}/{fullKey}";
         
-        byte[] content = await _dataObject.Download(fullKey);
+        byte[] content = await _dataObject.Download(fullPath);
         
         return File(content, contentType, key);
     }
 
     [HttpPatch]
     [Route("{key}/publish")]
-    public async Task<IActionResult> Publish(string key)
+    [ProducesResponseType(200), ProducesResponseType(400), ProducesResponseType(404)]
+    public async Task<IActionResult> Publish(string key, [FromQuery] string? path = null)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
         if (contentType is null)
@@ -63,25 +69,28 @@ public class DataObjectController : ControllerBase
 
         string fileExt = MimeTypeMap.GetExtension(contentType);
         string fullKey = $"{key}{fileExt}";
+        string fullPath = path is null ? fullKey : $"{path}/{fullKey}";
 
-        string url = await _dataObject.Publish(fullKey);
+        string url = await _dataObject.Publish(fullPath);
         return Ok(url);
     }
 
     [HttpDelete]
     [Route("{key}")]
-    public async Task<IActionResult> Delete(string key)
+    [ProducesResponseType(200), ProducesResponseType(400), ProducesResponseType(404)]
+    public async Task<IActionResult> Delete(string key, [FromQuery] string? path = null, [FromQuery] bool recursively = false)
     {
         string contentType = HttpContext.Request.Headers["Content-Type"];
-        if (contentType is null)
+
+        if (!recursively && contentType is null)
         {
             return BadRequest("Missing Content-Type header");
         }
 
-        string fileExt = MimeTypeMap.GetExtension(contentType);
-        string fullKey = $"{key}{fileExt}";
-        
-        await _dataObject.Delete(fullKey);
+        string fullKey = recursively ? key : $"{key}{MimeTypeMap.GetExtension(contentType)}";
+        string fullPath = path is null ? fullKey : $"{path}/{fullKey}";
+
+        await _dataObject.Delete(fullPath, recursively);
         return Ok();
     }
 }

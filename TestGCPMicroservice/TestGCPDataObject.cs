@@ -1,13 +1,14 @@
-using GCPMicroservice.Exceptions;
 using System.Text;
+using GCPMicroservice.Services;
+using GCPMicroservice.Exceptions;
 
 namespace TestGCPMicroservice;
 
 [TestClass]
 public class TestGCPDataObject
 {
-    private const string Path     = "tests/";
-    private const string Key      = "object.txt";
+    private const string Path    = "tests/";
+    private const string Key     = "object.txt";
     private const string FullKey = Path + Key;
 
     private readonly byte[] Content = Encoding.UTF8.GetBytes("content of the file");
@@ -95,7 +96,7 @@ public class TestGCPDataObject
     }
 
     [TestMethod]
-    public async Task ForceCreateObject_AlreadyExists_ObjectExists()
+    public async Task CreateObject_ForceAlreadyExists_ObjectExists()
     {
         // Arrange
         byte[] content = Encoding.UTF8.GetBytes("updated content");
