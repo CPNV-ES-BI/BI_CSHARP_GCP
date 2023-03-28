@@ -14,11 +14,11 @@ endlegend
 
 package GCP_Microservice {
     interface IDataObject {
-     +doesExist(string key) : Task<bool>
-     +create(string key, string path, bool force = false) : Task
-     +download(string key) : Task<byte[]>
-     +publish(string key) : Task<string>
-     +delete(string key, bool recursively = false) : Task
+     +doesExist(string key) : bool
+     +create(string key, string path, bool force = false) : void
+     +download(string key) : byte[]
+     +publish(string key) : string
+     +delete(string key, bool recursively = false) : void
     }
 
     class GCPDataObject {

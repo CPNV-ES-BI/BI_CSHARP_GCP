@@ -7,8 +7,8 @@ namespace TestGCPMicroservice;
 [TestClass]
 public class TestGCPDataObject
 {
-    private const string Path     = "tests/";
-    private const string Key      = "object.txt";
+    private const string Path    = "tests/";
+    private const string Key     = "object.txt";
     private const string FullKey = Path + Key;
 
     private readonly byte[] Content = Encoding.UTF8.GetBytes("content of the file");

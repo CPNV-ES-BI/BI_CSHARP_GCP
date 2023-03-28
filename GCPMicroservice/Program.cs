@@ -10,6 +10,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod()));
+
 string dotenv = Path.Combine(Environment.CurrentDirectory, ".env");
 DotEnv.Load(dotenv);
 
@@ -25,6 +30,8 @@ if (app.Environment.IsDevelopment())
     
     app.UseHttpLogging();
 }
+
+app.UseCors();
 
 app.UseAuthorization();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
